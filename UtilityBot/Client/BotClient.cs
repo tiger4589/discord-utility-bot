@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using UtilityBot.Services.GuildJoinedServices.Interfaces;
 using UtilityBot.Services.InteractionServiceManager;
 using UtilityBot.Services.LoggingServices;
+using UtilityBot.Services.UserJoinedServices;
 
 namespace UtilityBot.Client;
 
@@ -18,6 +19,7 @@ public class BotClient
     private readonly IGuildJoinedManager _guildJoinedManager;
     private readonly IInteractionServiceServices _interactionService;
     private readonly ILoggingService _loggingService;
+    private readonly IUserJoinedService _userJoinedService;
 
     //private CommandService? _commandService;
     //private CommandHandler _handler;
@@ -28,6 +30,7 @@ public class BotClient
         _guildJoinedManager = serviceProvider.GetRequiredService<IGuildJoinedManager>();
         _interactionService = serviceProvider.GetRequiredService<IInteractionServiceServices>();
         _loggingService = serviceProvider.GetRequiredService<ILoggingService>();
+        _userJoinedService = serviceProvider.GetRequiredService<IUserJoinedService>();
     }
 
     public async Task StartClient()
@@ -60,5 +63,6 @@ public class BotClient
         await _loggingService.InitializeService(_client!);
         await _guildJoinedManager.InitializeService(_client!);
         await _interactionService.InitializeService(_client!);
+        await _userJoinedService.InitializeService(_client!);
     }
 }

@@ -39,6 +39,109 @@ public class CacheManager : ICacheManager
         UpdateUserJoinConfiguration(configuration);
     }
 
+    public void AddOrUpdate(UserJoinRoleConfiguration userJoinRoleConfiguration)
+    {
+        if (_userJoinConfiguration.ContainsKey(userJoinRoleConfiguration.UserJoinConfiguration.GuildId))
+        {
+            var userJoinConfiguration = (List<UserJoinConfiguration>?) _userJoinConfiguration[userJoinRoleConfiguration.UserJoinConfiguration.GuildId];
+            if (userJoinConfiguration != null)
+            {
+                if (userJoinConfiguration.All(x => x.Action != userJoinRoleConfiguration.UserJoinConfiguration.Action))
+                {
+                    userJoinConfiguration.Add(userJoinRoleConfiguration.UserJoinConfiguration);
+                }
+            }
+            else
+            {
+                _userJoinConfiguration[userJoinRoleConfiguration.UserJoinConfiguration.GuildId] = new List<UserJoinConfiguration> {userJoinRoleConfiguration.UserJoinConfiguration};
+            }
+        }
+        else
+        {
+            _userJoinConfiguration.Add(userJoinRoleConfiguration.UserJoinConfiguration.GuildId, new List<UserJoinConfiguration>{userJoinRoleConfiguration.UserJoinConfiguration});
+        }
+
+        if (_userJoinRole.ContainsKey(userJoinRoleConfiguration.UserJoinRole.GuildId))
+        {
+            var userJoinRoles = (List<UserJoinRole>?)_userJoinRole[userJoinRoleConfiguration.UserJoinConfiguration.GuildId];
+            if (userJoinRoles != null)
+            {
+                if (userJoinRoles.All(x => x.RoleId != userJoinRoleConfiguration.UserJoinRole.RoleId))
+                {
+                    userJoinRoles.Add(userJoinRoleConfiguration.UserJoinRole);
+                }
+            }
+            else
+            {
+                _userJoinRole[userJoinRoleConfiguration.UserJoinConfiguration.GuildId] = new List<UserJoinRole> { userJoinRoleConfiguration.UserJoinRole };
+            }
+        }
+        else
+        {
+            _userJoinRole.Add(userJoinRoleConfiguration.UserJoinRole.GuildId, new List<UserJoinRole>{userJoinRoleConfiguration.UserJoinRole});
+        }
+    }
+
+    public void AddOrUpdate(UserJoinMessageConfiguration userJoinMessageConfiguration)
+    {
+        if (_userJoinConfiguration.ContainsKey(userJoinMessageConfiguration.UserJoinConfiguration.GuildId))
+        {
+            var userJoinConfiguration = (List<UserJoinConfiguration>?)_userJoinConfiguration[userJoinMessageConfiguration.UserJoinConfiguration.GuildId];
+            if (userJoinConfiguration != null)
+            {
+                if (userJoinConfiguration.All(x => x.Action != userJoinMessageConfiguration.UserJoinConfiguration.Action))
+                {
+                    userJoinConfiguration.Add(userJoinMessageConfiguration.UserJoinConfiguration);
+                }
+            }
+            else
+            {
+                _userJoinConfiguration[userJoinMessageConfiguration.UserJoinConfiguration.GuildId] = new List<UserJoinConfiguration> { userJoinMessageConfiguration.UserJoinConfiguration };
+            }
+        }
+        else
+        {
+            _userJoinConfiguration.Add(userJoinMessageConfiguration.UserJoinConfiguration.GuildId, new List<UserJoinConfiguration> { userJoinMessageConfiguration.UserJoinConfiguration });
+        }
+
+        if (_userJoinMessage.ContainsKey(userJoinMessageConfiguration.UserJoinMessage.GuildId))
+        {
+            var userJoinMessages = (List<UserJoinMessage>?)_userJoinMessage[userJoinMessageConfiguration.UserJoinConfiguration.GuildId];
+            if (userJoinMessages != null)
+            {
+                userJoinMessages.Clear();
+                userJoinMessages.Add(new UserJoinMessage(userJoinMessageConfiguration.UserJoinMessage.GuildId,
+                    userJoinMessageConfiguration.UserJoinMessage.Message,
+                    userJoinMessageConfiguration.UserJoinMessage.IsPrivate,
+                    userJoinMessageConfiguration.UserJoinMessage.ChannelId));
+            }
+            else
+            {
+                _userJoinMessage[userJoinMessageConfiguration.UserJoinConfiguration.GuildId] = new List<UserJoinMessage> { userJoinMessageConfiguration.UserJoinMessage };
+            }
+        }
+        else
+        {
+            _userJoinRole.Add(userJoinMessageConfiguration.UserJoinMessage.GuildId, new List<UserJoinMessage> { userJoinMessageConfiguration.UserJoinMessage });
+        }
+    }
+
+    public Configuration? GetGuildOnJoinConfiguration(ulong guildId)
+    {
+        if (!_userJoinConfiguration.ContainsKey(guildId))
+        {
+            return null;
+        }
+
+        var userJoinConfigurations = (List<UserJoinConfiguration>?) _userJoinConfiguration[guildId];
+
+        var userJoinMessages = (List<UserJoinMessage>?)_userJoinMessage[guildId];
+
+        var userJoinRoles = (List<UserJoinRole>?)_userJoinRole[guildId];
+
+        return new Configuration(userJoinConfigurations!, userJoinMessages ?? new List<UserJoinMessage>(), userJoinRoles ?? new List<UserJoinRole>());
+    }
+
     private void RemoveKeyIfExist(Hashtable table, ulong key)
     {
         if (table.ContainsKey(key))

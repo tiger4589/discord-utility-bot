@@ -25,6 +25,9 @@
     <Folder Include="Services\CacheService\" />
     <Folder Include="Services\InteractionServiceManager\" />
     <Folder Include="Services\LoggingServices\" />
+    <Folder Include="Services\ConfigurationServices\" />
+    <Folder Include="Services\ApiCallerServices\" />
+    <Folder Include="Services\UserJoinedServices\" />
   </ItemGroup>
 
   <ItemGroup>

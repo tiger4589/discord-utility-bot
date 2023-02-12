@@ -2,20 +2,21 @@
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 using UtilityBot.Contracts;
+using UtilityBot.Services.ApiCallerServices;
 using UtilityBot.Services.CacheService;
 using UtilityBot.Services.GuildJoinedServices.Interfaces;
 
 namespace UtilityBot.Services.GuildJoinedServices.Managers;
 
-public class GuildJoinedManager : IGuildJoinedManager
+public class GuildJoinedManager : BaseApiCallService, IGuildJoinedManager
 {
-    private readonly HttpClient _httpClient;
     private readonly ICacheManager _cacheManager;
     private readonly string _apiBaseUrl;
 
-    public GuildJoinedManager(IConfiguration configuration, HttpClient httpClient, ICacheManager cacheManager)
+
+
+    public GuildJoinedManager(IConfiguration configuration, ICacheManager cacheManager) : base(configuration)
     {
-        _httpClient = httpClient;
         _cacheManager = cacheManager;
         _apiBaseUrl = configuration["ApiBaseUrl"] ?? throw new InvalidOperationException($"API Base URL Can't be found!");
     }
@@ -35,12 +36,11 @@ public class GuildJoinedManager : IGuildJoinedManager
     {
         var connectedServers = guilds.Select(x => new ConnectedServer(x.Id, x.Name)).ToList();
 
-        var response = await _httpClient.PostAsync(
-            string.Concat(_apiBaseUrl, "configuration/get-servers-configuration"),
-            JsonContent.Create(connectedServers),
-            default);
+        ServiceUrl = "configuration/get-servers-configuration";
+
+        var configuration = await RequestApi<Configuration>(connectedServers);
+
         //todo: try not to block the slash commands from being initialized somehow
-        var configuration = await response.Content.ReadFromJsonAsync<Configuration?>();
         _cacheManager.InitializeCache(configuration);
     }
 
@@ -48,11 +48,9 @@ public class GuildJoinedManager : IGuildJoinedManager
     {
         var connectedServer = new ConnectedServer(guild.Id, guild.Name);
 
-        var response = await _httpClient.PostAsync(
-            string.Concat(_apiBaseUrl, "configuration/get-server-configuration"),
-            JsonContent.Create(connectedServer));
+        ServiceUrl = "configuration/get-server-configuration";
 
-        var configuration = await response.Content.ReadFromJsonAsync<Configuration?>();
+        var configuration = await RequestApi<Configuration>(connectedServer);
 
         if (configuration == null)
         {
@@ -66,4 +64,6 @@ public class GuildJoinedManager : IGuildJoinedManager
 
         _cacheManager.UpdateCache(configuration);
     }
+
+    public override string? ServiceUrl { get; set; }
 }
