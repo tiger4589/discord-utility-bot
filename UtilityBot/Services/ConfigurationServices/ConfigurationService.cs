@@ -22,7 +22,15 @@ public class ConfigurationService : BaseApiCallService, IConfigurationService
         var configuration = new UserJoinRoleConfiguration(new UserJoinConfiguration(guildId, ActionTypeNames.AddRole),
             new UserJoinRole(guildId, roleId));
 
-        //todo: check if I can give that role in first place!
+        var myRoles = interactionContext.Guild.CurrentUser.Roles;
+        var socketRole = interactionContext.Guild.GetRole(roleId);
+
+        if (myRoles.All(x => x.Position <= socketRole.Position))
+        {
+            RaiseErrorOnRole(new ConfigurationServiceEventArgs(interactionContext));
+            return;
+        }
+
         ServiceUrl = "configuration/add-user-join-role-conf";
 
         await CallApi(configuration);
@@ -39,7 +47,27 @@ public class ConfigurationService : BaseApiCallService, IConfigurationService
             return;
         }
 
-        //todo: check if I can send a message there!
+        if (channelId != null && !isPrivate)
+        {
+            //todo: find a better way to check this
+            var channel = context.Guild.GetChannel(channelId.Value) as ITextChannel;
+            if (channel == null)
+            {
+                RaiseErrorOnPublicMessage(new ConfigurationServiceEventArgs(context, "I can't see this channel!"));
+                return;
+            }
+
+            try
+            {
+                var userMessage = await channel.SendMessageAsync("Test");
+                await userMessage.DeleteAsync();
+            }
+            catch 
+            {
+                RaiseErrorOnPublicMessage(new ConfigurationServiceEventArgs(context, "I probably can't send messages to this channel!"));
+                return;
+            }
+        }
 
         var configuration = new UserJoinMessageConfiguration(
             new UserJoinConfiguration(guildId, ActionTypeNames.SendMessage),
@@ -69,9 +97,16 @@ public class ConfigurationService : BaseApiCallService, IConfigurationService
         handler?.Invoke(this, args);
     }
 
+    private protected void RaiseErrorOnRole(ConfigurationServiceEventArgs args)
+    {
+        var handler = ErrorOnRole;
+        handler?.Invoke(this, args);
+    }
+
     public event EventHandler<ConfigurationServiceEventArgs>? RoleConfigured;
     public event EventHandler<ConfigurationServiceEventArgs>? MessageConfigured;
     public event EventHandler<ConfigurationServiceEventArgs>? ErrorOnPublicMessage;
+    public event EventHandler<ConfigurationServiceEventArgs>? ErrorOnRole;
 
     public override string? ServiceUrl { get; set; }
 }

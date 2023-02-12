@@ -9,6 +9,7 @@ public interface IConfigurationService
     Task AddMessageToGuildOnJoin(SocketInteractionContext context, ulong guildId, string message, bool isPrivate, ulong? channelId);
 
     public event EventHandler<ConfigurationServiceEventArgs> RoleConfigured;
+    public event EventHandler<ConfigurationServiceEventArgs> ErrorOnRole;
     public event EventHandler<ConfigurationServiceEventArgs> MessageConfigured;
     public event EventHandler<ConfigurationServiceEventArgs> ErrorOnPublicMessage;
 }

@@ -32,11 +32,19 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
         private void AddHandlers()
         {
             _configurationService.RoleConfigured += ConfigurationServiceOnRoleConfigured;
+            _configurationService.ErrorOnRole += OnRoleError;
         }
 
         private void RemoveHandlers()
         {
             _configurationService.RoleConfigured -= ConfigurationServiceOnRoleConfigured;
+            _configurationService.ErrorOnRole -= OnRoleError;
+        }
+
+        private async void OnRoleError(object? sender, ConfigurationServiceEventArgs e)
+        {
+            await e.InteractionContext.Interaction.ModifyOriginalResponseAsync(prop =>
+                prop.Content = "I can't give a higher role than mine! Fix that before.");
         }
 
         private async void ConfigurationServiceOnRoleConfigured(object? sender, ConfigurationServiceEventArgs e)
@@ -57,7 +65,7 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
         }
 
         [SlashCommand("add", "Specify Message and Parameters")]
-        public async Task AddMessage(string message, bool isPrivate, IChannel? channel = null)
+        public async Task AddMessage(string message, bool isPrivate, ITextChannel? channel = null)
         {
             RemoveHandlers();
             AddHandlers();
@@ -86,6 +94,13 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
 
         private async void ErrorPublicMessage(object? sender, ConfigurationServiceEventArgs e)
         {
+            if (!string.IsNullOrWhiteSpace(e.Message))
+            {
+                await e.InteractionContext.Interaction.ModifyOriginalResponseAsync(prop =>
+                    prop.Content = e.Message);
+                return;
+            }
+
             await e.InteractionContext.Interaction.ModifyOriginalResponseAsync(prop =>
                 prop.Content = "Couldn't add the configuration! You want it in public but didn't specify a channel!");
         }
