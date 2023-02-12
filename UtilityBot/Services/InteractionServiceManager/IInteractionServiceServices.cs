@@ -1,6 +1,6 @@
 ﻿namespace UtilityBot.Services.InteractionServiceManager;
 
-public interface IInteractionServiceServices : IDiscordClientService
+public interface IInteractionServiceServices 
 {
     
 }

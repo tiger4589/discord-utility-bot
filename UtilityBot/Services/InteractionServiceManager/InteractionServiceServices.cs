@@ -8,25 +8,28 @@ namespace UtilityBot.Services.InteractionServiceManager;
 public class InteractionServiceServices : IInteractionServiceServices
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly DiscordSocketClient _client;
     private InteractionService? _interactionService;
 
-    public InteractionServiceServices(IServiceProvider serviceProvider)
+    public InteractionServiceServices(IServiceProvider serviceProvider, DiscordSocketClient client)
     {
         _serviceProvider = serviceProvider;
+        _client = client;
+        _client.Ready += InitializeService;
     }
 
-    public async Task InitializeService(DiscordSocketClient client)
+    public async Task InitializeService()
     {
-        _interactionService = new InteractionService(client);
+        _interactionService = new InteractionService(_client);
         await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
         //todo: register globally on release
         await _interactionService.RegisterCommandsToGuildAsync(686553421280575521);
 
         _interactionService.SlashCommandExecuted += InteractionServiceOnSlashCommandExecuted;
 
-        client.InteractionCreated += async interaction =>
+        _client.InteractionCreated += async interaction =>
         {
-            var ctx = new SocketInteractionContext(client, interaction);
+            var ctx = new SocketInteractionContext(_client, interaction);
             await _interactionService.ExecuteCommandAsync(ctx, _serviceProvider);
         };
     }

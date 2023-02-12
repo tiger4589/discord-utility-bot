@@ -8,15 +8,18 @@ namespace UtilityBot.Services.UserJoinedServices;
 public class UserJoinedService : IUserJoinedService
 {
     private readonly ICacheManager _cahCacheManager;
+    private readonly DiscordSocketClient _client;
 
-    public UserJoinedService(ICacheManager cahCacheManager)
+    public UserJoinedService(ICacheManager cahCacheManager, DiscordSocketClient client)
     {
         _cahCacheManager = cahCacheManager;
+        _client = client;
+        _client.Ready += InitializeService;
     }
 
-    public Task InitializeService(DiscordSocketClient client)
+    public Task InitializeService()
     {
-        client.UserJoined += ClientOnUserJoined;
+        _client.UserJoined += ClientOnUserJoined;
         return Task.CompletedTask;
     }
 

@@ -1,6 +1,5 @@
 ﻿using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
-using System.Net.Http.Json;
 using UtilityBot.Contracts;
 using UtilityBot.Services.ApiCallerServices;
 using UtilityBot.Services.CacheService;
@@ -11,20 +10,19 @@ namespace UtilityBot.Services.GuildJoinedServices.Managers;
 public class GuildJoinedManager : BaseApiCallService, IGuildJoinedManager
 {
     private readonly ICacheManager _cacheManager;
-    private readonly string _apiBaseUrl;
+    private readonly DiscordSocketClient _client;
 
-
-
-    public GuildJoinedManager(IConfiguration configuration, ICacheManager cacheManager) : base(configuration)
+    public GuildJoinedManager(IConfiguration configuration, ICacheManager cacheManager, DiscordSocketClient client) : base(configuration)
     {
         _cacheManager = cacheManager;
-        _apiBaseUrl = configuration["ApiBaseUrl"] ?? throw new InvalidOperationException($"API Base URL Can't be found!");
+        _client = client;
+        _client.Ready += ClientOnReady;
     }
 
-    public async Task InitializeService(DiscordSocketClient client)
+    private async Task ClientOnReady()
     {
-        await GetConfigurationOnRun(client.Guilds);
-        client.JoinedGuild += ClientOnJoinedGuild;
+        await GetConfigurationOnRun(_client.Guilds);
+        _client.JoinedGuild += ClientOnJoinedGuild;
     }
 
     private async Task ClientOnJoinedGuild(SocketGuild arg)
@@ -34,14 +32,21 @@ public class GuildJoinedManager : BaseApiCallService, IGuildJoinedManager
 
     private async Task GetConfigurationOnRun(IReadOnlyCollection<SocketGuild> guilds)
     {
-        var connectedServers = guilds.Select(x => new ConnectedServer(x.Id, x.Name)).ToList();
+        //todo: let me know that I can't connect to the API!
+        try
+        {
+            var connectedServers = guilds.Select(x => new ConnectedServer(x.Id, x.Name)).ToList();
 
-        ServiceUrl = "configuration/get-servers-configuration";
+            ServiceUrl = "configuration/get-servers-configuration";
 
-        var configuration = await RequestApi<Configuration>(connectedServers);
+            var configuration = await RequestApi<Configuration>(connectedServers);
 
-        //todo: try not to block the slash commands from being initialized somehow
-        _cacheManager.InitializeCache(configuration);
+            _cacheManager.InitializeCache(configuration);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 
     private async Task GetConfigurationOnJoin(SocketGuild guild)

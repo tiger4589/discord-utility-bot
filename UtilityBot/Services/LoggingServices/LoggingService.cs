@@ -6,12 +6,18 @@ namespace UtilityBot.Services.LoggingServices;
 
 public class LoggingService : ILoggingService
 {
-    private DiscordSocketClient? _client;
-    public Task InitializeService(DiscordSocketClient client)
+    private readonly DiscordSocketClient _client;
+
+    public LoggingService(DiscordSocketClient client)
     {
         _client = client;
-        client.Log += LogAsync;
-        client.MessageReceived += MessageReceived;
+        _client.Ready += InitializeService;
+    }
+
+    public Task InitializeService()
+    {
+        _client.Log += LogAsync;
+        _client.MessageReceived += MessageReceived;
         return Task.CompletedTask;
     }
 

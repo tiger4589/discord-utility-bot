@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Discord;
+using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using UtilityBot.Client;
 using UtilityBot.Services.CacheService;
@@ -9,27 +11,41 @@ using UtilityBot.Services.InteractionServiceManager;
 using UtilityBot.Services.LoggingServices;
 using UtilityBot.Services.UserJoinedServices;
 
+var serviceProvider = BuildServiceProvider();
+InitializeMainComponents(serviceProvider);
+var client = serviceProvider.GetRequiredService<BotClient>();
+await client.StartClient();
+
 IServiceProvider BuildServiceProvider() => new ServiceCollection()
-    //Transient
-    .AddTransient<BotClient>()
-    .AddTransient<IConfiguration>(sp =>
+    .AddSingleton<IConfiguration>(sp =>
     {
         IConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
         configurationBuilder.AddJsonFile("appsettings.json");
         return configurationBuilder.Build();
     })
-    .AddTransient<IGuildJoinedManager, GuildJoinedManager>()
-    .AddTransient<IInteractionServiceServices, InteractionServiceServices>()
-    .AddTransient<ILoggingService, LoggingService>()
-    .AddTransient<IConfigurationService, ConfigurationService>()
-    .AddTransient<IUserJoinedService, UserJoinedService>()
-    //Singletons
+    .AddSingleton<DiscordSocketClient>(_ =>
+    {
+        var config = new DiscordSocketConfig
+        {
+            GatewayIntents = GatewayIntents.All,
+            UseInteractionSnowflakeDate = false
+        };
+
+        return new DiscordSocketClient(config);
+    })
+    .AddSingleton<IGuildJoinedManager, GuildJoinedManager>()
+    .AddSingleton<IInteractionServiceServices, InteractionServiceServices>()
+    .AddSingleton<ILoggingService, LoggingService>()
+    .AddSingleton<IConfigurationService, ConfigurationService>()
+    .AddSingleton<IUserJoinedService, UserJoinedService>()
     .AddSingleton<ICacheManager, CacheManager>()
-    //Build The Service Provider!
+    .AddSingleton<BotClient>()
     .BuildServiceProvider();
 
-var serviceProvider = BuildServiceProvider();
-
-var client = serviceProvider.GetRequiredService<BotClient>();
-
-await client.StartClient();
+void InitializeMainComponents(IServiceProvider serviceProvider1)
+{
+    serviceProvider.GetRequiredService<IGuildJoinedManager>();
+    serviceProvider.GetRequiredService<ILoggingService>();
+    serviceProvider.GetRequiredService<IInteractionServiceServices>();
+    serviceProvider.GetRequiredService<IUserJoinedService>();
+}
