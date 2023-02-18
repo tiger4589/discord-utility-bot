@@ -1,6 +1,8 @@
-﻿namespace UtilityBot.Services.UserJoinedServices;
+﻿using Discord;
 
-public interface IUserJoinedService 
+namespace UtilityBot.Services.UserJoinedServices;
+
+public interface IUserJoinedService
 {
-    
+    Task TriggerSendMessageOnJoin(IUser user);
 }

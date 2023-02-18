@@ -1,14 +1,19 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using UtilityBot.Client;
+using UtilityBot.Domain.Database;
+using UtilityBot.Domain.Mappers;
 using UtilityBot.Services.CacheService;
 using UtilityBot.Services.ConfigurationServices;
 using UtilityBot.Services.GuildJoinedServices.Interfaces;
 using UtilityBot.Services.GuildJoinedServices.Managers;
 using UtilityBot.Services.InteractionServiceManager;
 using UtilityBot.Services.LoggingServices;
+using UtilityBot.Services.PlayerServices;
 using UtilityBot.Services.UserJoinedServices;
 
 var serviceProvider = BuildServiceProvider();
@@ -22,6 +27,11 @@ IServiceProvider BuildServiceProvider() => new ServiceCollection()
         IConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
         configurationBuilder.AddJsonFile("appsettings.json");
         return configurationBuilder.Build();
+    })
+    .AddDbContext<UtilityBotContext>((sp,options) =>
+    {
+        var conf = sp.GetRequiredService<IConfiguration>();
+        options.UseSqlServer(conf["DefaultConnection"]);
     })
     .AddSingleton<DiscordSocketClient>(_ =>
     {
@@ -39,7 +49,12 @@ IServiceProvider BuildServiceProvider() => new ServiceCollection()
     .AddSingleton<IConfigurationService, ConfigurationService>()
     .AddSingleton<IUserJoinedService, UserJoinedService>()
     .AddSingleton<ICacheManager, CacheManager>()
+    .AddSingleton<IPlayerService, PlayerService>()
     .AddSingleton<BotClient>()
+    .AddSingleton<UtilityBot.Domain.Services.ConfigurationService.Interfaces.IConfigurationService, UtilityBot.Domain.Services.ConfigurationService.Services.ConfigurationService>()
+    .AddAutoMapper(typeof(ServerMappingProfile))
+    .AddTransient<ILogger>(_ => new LoggerConfiguration().MinimumLevel.Warning().WriteTo.File("logs\\log-.txt", rollingInterval: RollingInterval.Hour,
+        shared: true, retainedFileCountLimit: 72).CreateLogger())
     .BuildServiceProvider();
 
 void InitializeMainComponents(IServiceProvider serviceProvider1)

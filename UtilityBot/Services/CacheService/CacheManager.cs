@@ -9,9 +9,11 @@ public class CacheManager : ICacheManager
     private readonly Hashtable _userJoinMessage = new Hashtable();
     private readonly Hashtable _userJoinRole = new Hashtable();
 
+    private readonly Hashtable _verifyConfiguration = new Hashtable();
+
     private bool _isLoaded = false;
 
-    public void InitializeCache(Configuration? configuration)
+    public void InitializeCache(Configuration? configuration, VerifyConfiguration? verifyConfiguration)
     {
         if (configuration == null)
         {
@@ -22,6 +24,11 @@ public class CacheManager : ICacheManager
         ClearCache();
 
         InitializeUserJoinConfiguration(configuration);
+
+        if (verifyConfiguration != null)
+        {
+            AddOrUpdate(verifyConfiguration);
+        }
 
         _isLoaded = true;
     }
@@ -122,7 +129,64 @@ public class CacheManager : ICacheManager
         }
         else
         {
-            _userJoinRole.Add(userJoinMessageConfiguration.UserJoinMessage.GuildId, new List<UserJoinMessage> { userJoinMessageConfiguration.UserJoinMessage });
+            _userJoinMessage.Add(userJoinMessageConfiguration.UserJoinMessage.GuildId, new List<UserJoinMessage> { userJoinMessageConfiguration.UserJoinMessage });
+        }
+    }
+
+    public void AddOrUpdate(VerifyConfiguration configuration)
+    {
+        _verifyConfiguration.Clear();
+        _verifyConfiguration.Add("verify", configuration);
+    }
+
+    public VerifyConfiguration? GetVerifyConfiguration()
+    {
+        if (_verifyConfiguration.Count == 0) return null;
+
+        return (VerifyConfiguration?)_verifyConfiguration["verify"];
+    }
+
+    public void RemoveMessageConfiguration(ulong guildId)
+    {
+        _userJoinMessage.Clear();
+
+        var userJoinConfiguration = (List<UserJoinConfiguration>?)_userJoinConfiguration[guildId];
+        if (userJoinConfiguration == null)
+        {
+            return;
+        }
+
+        if (userJoinConfiguration.Any(x => x.Action == ActionTypeNames.SendMessage))
+        {
+            userJoinConfiguration.Remove(userJoinConfiguration.Single(x => x.Action == ActionTypeNames.SendMessage));
+        }
+    }
+
+    public void RemoveRoleConfiguration(ulong guildId, ulong roleId)
+    {
+        var userJoinRoles = (List<UserJoinRole>?)_userJoinRole[guildId];
+
+        if (userJoinRoles != null)
+        {
+            if (userJoinRoles.Count > 1)
+            {
+                userJoinRoles.Remove(userJoinRoles.Single(x => x.RoleId == roleId));
+            }
+            else
+            {
+                _userJoinRole.Clear();
+            }
+        }
+
+        var userJoinConfiguration = (List<UserJoinConfiguration>?)_userJoinConfiguration[guildId];
+        if (userJoinConfiguration == null)
+        {
+            return;
+        }
+
+        if (userJoinConfiguration.Any(x => x.Action == ActionTypeNames.AddRole))
+        {
+            userJoinConfiguration.Remove(userJoinConfiguration.Single(x => x.Action == ActionTypeNames.AddRole));
         }
     }
 
@@ -214,5 +278,6 @@ public class CacheManager : ICacheManager
         _userJoinConfiguration.Clear();
         _userJoinMessage.Clear();
         _userJoinRole.Clear();
+        _verifyConfiguration.Clear();
     }
 }

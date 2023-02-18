@@ -64,5 +64,24 @@ namespace UtilityBot.Api.Controllers
 
             return Ok();
         }
+
+        [HttpPost("add-verify-configuration")]
+        public async Task<IActionResult> AddVerifyConfiguration([FromBody] VerifyConfiguration configuration)
+        {
+            await _mediator.Send(new AddVerifyConfigurationRequest
+            {
+                VerifyConfiguration = configuration
+            });
+
+            return Ok();
+        }
+
+        [HttpPost("get-verify-configuration")]
+        public async Task<IActionResult> GetVerifyConfiguration()
+        {
+            var verifyConfiguration = await _mediator.Send(new GetVerifyConfigurationRequest());
+
+            return Ok(verifyConfiguration);
+        }
     }
 }

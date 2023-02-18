@@ -1,20 +1,21 @@
-﻿using Discord;
+﻿using Azure.Core;
+using Discord;
 using Discord.Interactions;
-using Microsoft.Extensions.Configuration;
 using UtilityBot.Contracts;
 using UtilityBot.EventArguments;
-using UtilityBot.Services.ApiCallerServices;
 using UtilityBot.Services.CacheService;
 
 namespace UtilityBot.Services.ConfigurationServices;
 
-public class ConfigurationService : BaseApiCallService, IConfigurationService
+public class ConfigurationService : IConfigurationService
 {
     private readonly ICacheManager _cacheManager;
+    private readonly Domain.Services.ConfigurationService.Interfaces.IConfigurationService _configurationService;
 
-    public ConfigurationService(IConfiguration configuration, ICacheManager cacheManager) : base(configuration)
+    public ConfigurationService(ICacheManager cacheManager, Domain.Services.ConfigurationService.Interfaces.IConfigurationService configurationService)
     {
         _cacheManager = cacheManager;
+        _configurationService = configurationService;
     }
 
     public async Task AddRoleToGuildOnJoin(SocketInteractionContext interactionContext, ulong guildId, ulong roleId)
@@ -31,9 +32,7 @@ public class ConfigurationService : BaseApiCallService, IConfigurationService
             return;
         }
 
-        ServiceUrl = "configuration/add-user-join-role-conf";
-
-        await CallApi(configuration);
+        await _configurationService.AddUserJoinRoleConfiguration(configuration.UserJoinConfiguration, configuration.UserJoinRole);
         _cacheManager.AddOrUpdate(configuration);
         RaiseRoleConfiguredEvent(new ConfigurationServiceEventArgs(interactionContext));
     }
@@ -73,10 +72,69 @@ public class ConfigurationService : BaseApiCallService, IConfigurationService
             new UserJoinConfiguration(guildId, ActionTypeNames.SendMessage),
             new UserJoinMessage(guildId, message, isPrivate, channelId));
 
-        ServiceUrl = "configuration/add-user-join-message-conf";
-        await CallApi(configuration);
+
+        await _configurationService.AddUserJoinMessageConfiguration(configuration.UserJoinConfiguration,
+            configuration.UserJoinMessage);
         _cacheManager.AddOrUpdate(configuration);
         RaiseMessageConfigured(new ConfigurationServiceEventArgs(context));
+    }
+
+    public async Task AddVerifyConfiguration(SocketInteractionContext context, ulong channelId, ulong roleId)
+    {
+
+        var channel = context.Guild.GetChannel(channelId) as ITextChannel;
+        if (channel == null)
+        {
+            RaiseErrorOnPublicMessage(new ConfigurationServiceEventArgs(context, "I can't see this channel!"));
+            return;
+        }
+
+        try
+        {
+            var userMessage = await channel.SendMessageAsync("Test");
+            await userMessage.DeleteAsync();
+        }
+        catch
+        {
+            RaiseErrorOnPublicMessage(new ConfigurationServiceEventArgs(context, "I probably can't send messages to this channel!"));
+            return;
+        }
+
+        var myRoles = context.Guild.CurrentUser.Roles;
+        var socketRole = context.Guild.GetRole(roleId);
+
+        if (myRoles.All(x => x.Position <= socketRole.Position))
+        {
+            RaiseErrorOnRole(new ConfigurationServiceEventArgs(context));
+            return;
+        }
+
+        var configuration = new VerifyConfiguration(channelId, roleId);
+        await _configurationService.AddVerifyConfiguration(configuration);
+        _cacheManager.AddOrUpdate(configuration);
+        RaiseVerifyConfigurationEvent(new ConfigurationServiceEventArgs(context));
+    }
+
+    public async Task RemoveWelcomeMessage(SocketInteractionContext context)
+    {
+        await _configurationService.RemoveUserJoinMessageConfiguration(context.Guild.Id);
+        _cacheManager.RemoveMessageConfiguration(context.Guild.Id);
+
+        RaiseMessageRemoved(new ConfigurationServiceEventArgs(context));
+    }
+
+    public async Task RemoveOnJoinRole(SocketInteractionContext context, ulong roleId)
+    {
+        await _configurationService.RemoveUserJoinRoleConfiguration(context.Guild.Id, roleId);
+        _cacheManager.RemoveRoleConfiguration(context.Guild.Id, roleId);
+
+        RaiseRoleRemoved(new ConfigurationServiceEventArgs(context));
+    }
+
+    private protected void RaiseVerifyConfigurationEvent(ConfigurationServiceEventArgs args)
+    {
+        var handler = VerifyConfigurationSet;
+        handler?.Invoke(this, args);
     }
 
     private protected void RaiseRoleConfiguredEvent(ConfigurationServiceEventArgs configurationServiceEventArgs)
@@ -103,10 +161,23 @@ public class ConfigurationService : BaseApiCallService, IConfigurationService
         handler?.Invoke(this, args);
     }
 
+    private protected void RaiseMessageRemoved(ConfigurationServiceEventArgs args)
+    {
+        var handler = MessageRemoved;
+        handler?.Invoke(this, args);
+    }
+
+    private protected void RaiseRoleRemoved(ConfigurationServiceEventArgs args)
+    {
+        var handler = RoleRemoved;
+        handler?.Invoke(this, args);
+    }
+
     public event EventHandler<ConfigurationServiceEventArgs>? RoleConfigured;
+    public event EventHandler<ConfigurationServiceEventArgs>? RoleRemoved;
     public event EventHandler<ConfigurationServiceEventArgs>? MessageConfigured;
     public event EventHandler<ConfigurationServiceEventArgs>? ErrorOnPublicMessage;
+    public event EventHandler<ConfigurationServiceEventArgs>? VerifyConfigurationSet;
     public event EventHandler<ConfigurationServiceEventArgs>? ErrorOnRole;
-
-    public override string? ServiceUrl { get; set; }
+    public event EventHandler<ConfigurationServiceEventArgs>? MessageRemoved;
 }

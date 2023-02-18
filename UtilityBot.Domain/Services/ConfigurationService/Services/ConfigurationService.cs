@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Xml;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using UtilityBot.Contracts;
@@ -8,6 +9,7 @@ using UtilityBot.Domain.Services.ConfigurationService.Interfaces;
 using UserJoinConfiguration = UtilityBot.Contracts.UserJoinConfiguration;
 using UserJoinMessage = UtilityBot.Contracts.UserJoinMessage;
 using UserJoinRole = UtilityBot.Contracts.UserJoinRole;
+using VerifyConfiguration = UtilityBot.Contracts.VerifyConfiguration;
 
 namespace UtilityBot.Domain.Services.ConfigurationService.Services;
 
@@ -74,6 +76,17 @@ public class ConfigurationService : IConfigurationService
         userJoinRoles.AddRange(_mapper.Map<List<UserJoinRole>>(dbUserJoinRoles));
 
         return new Configuration(userJoinConfigurations, userJoinMessages, userJoinRoles);
+    }
+
+    public async Task<VerifyConfiguration?> GetVerifyConfiguration()
+    {
+        var conf = await _context.VerifyConfigurations!.AsNoTracking().SingleOrDefaultAsync();
+        if (conf == null)
+        {
+            return null;
+        }
+
+        return new VerifyConfiguration(conf.ChannelId, conf.RoleId);
     }
 
     public async Task AddUserJoinRoleConfiguration(UserJoinConfiguration userJoinConfiguration, UserJoinRole userJoinRole)
@@ -154,6 +167,72 @@ public class ConfigurationService : IConfigurationService
         }
 
         await _context.SaveChangesAsync();
+    }
+
+    public async Task AddVerifyConfiguration(VerifyConfiguration verifyConfiguration)
+    {
+        var conf = await _context.VerifyConfigurations!.SingleOrDefaultAsync();
+        if (conf != null)
+        {
+            conf.RoleId = verifyConfiguration.RoleId;
+            conf.ChannelId = verifyConfiguration.ChannelId;
+        }
+        else
+        {
+            await _context.VerifyConfigurations!.AddAsync(new DomainObjects.VerifyConfiguration
+            {
+                RoleId = verifyConfiguration.RoleId,
+                ChannelId = verifyConfiguration.ChannelId
+            });
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task RemoveUserJoinMessageConfiguration(ulong guildId)
+    {
+        var userJoinConfigurations = await _context.UserJoinConfigurations!
+            .Where(x => x.Action == ActionTypeNames.SendMessage && x.GuildId == guildId).ToListAsync();
+
+        if (userJoinConfigurations.Any())
+        {
+            _context.UserJoinConfigurations!.RemoveRange(userJoinConfigurations);
+        }
+
+        var userJoinMessages = await _context.UserJoinMessages!.Where(x => x.GuildId == guildId).ToListAsync();
+
+        if (userJoinMessages.Any())
+        {
+            _context.UserJoinMessages!.RemoveRange(userJoinMessages);
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task RemoveUserJoinRoleConfiguration(ulong guildId, ulong roleId)
+    {
+        var userJoinRoles = await _context.UserJoinRoles!.Where(x => x.GuildId == guildId)
+            .ToListAsync();
+
+        if (userJoinRoles.Any(x => x.RoleId == roleId))
+        {
+            _context.UserJoinRoles!.RemoveRange(userJoinRoles.Where(x=>x.RoleId == roleId));
+        }
+
+        if (userJoinRoles.Count > 1)
+        {
+            await _context.SaveChangesAsync();
+            return;
+        }
+
+        var userJoinConfigurations = await _context.UserJoinConfigurations!
+            .Where(x => x.Action == ActionTypeNames.AddRole && x.GuildId == guildId).ToListAsync();
+
+        if (userJoinConfigurations.Any())
+        {
+            _context.UserJoinConfigurations!.RemoveRange(userJoinConfigurations);
+            await _context.SaveChangesAsync();
+        }
     }
 
     private async Task UpdateExistingServer(JoinedServer joinedServer, ConnectedServer connectedServer, bool isSave = false)

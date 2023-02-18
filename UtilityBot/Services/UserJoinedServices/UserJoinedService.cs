@@ -79,4 +79,9 @@ public class UserJoinedService : IUserJoinedService
             await user.AddRoleAsync(userJoinRole.RoleId);
         }
     }
+
+    public async Task TriggerSendMessageOnJoin(IUser user)
+    {
+        await ClientOnUserJoined((SocketGuildUser)user);
+    }
 }
