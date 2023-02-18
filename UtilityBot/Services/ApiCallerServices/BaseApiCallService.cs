@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
-using UtilityBot.Contracts;
 
 namespace UtilityBot.Services.ApiCallerServices;
 
+//keep it now to probably use it later for other stuff requiring external apis
 public abstract class BaseApiCallService
 {
     private readonly string _apiBaseUrl;
@@ -42,6 +42,31 @@ public abstract class BaseApiCallService
 
             var result = await response.Content.ReadFromJsonAsync<T?>();
             return result;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    protected async Task<T?> RequestApi<T>() where T : class
+    {
+        try
+        {
+            using var httpClient = new HttpClient();
+            var response = await httpClient.PostAsync(
+                string.Concat(_apiBaseUrl, ServiceUrl), null);
+
+            try
+            {
+                var result = await response.Content.ReadFromJsonAsync<T?>();
+                return result;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
         catch (Exception e)
         {

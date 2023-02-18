@@ -23,7 +23,8 @@ public class InteractionServiceServices : IInteractionServiceServices
         _interactionService = new InteractionService(_client);
         await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
         //todo: register globally on release
-        await _interactionService.RegisterCommandsToGuildAsync(686553421280575521);
+        //await _interactionService.RegisterCommandsToGuildAsync(686553421280575521); t45_server
+        await _interactionService.RegisterCommandsToGuildAsync(1072644346417000458);
 
         _interactionService.SlashCommandExecuted += InteractionServiceOnSlashCommandExecuted;
 

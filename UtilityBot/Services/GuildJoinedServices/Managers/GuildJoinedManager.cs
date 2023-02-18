@@ -1,21 +1,24 @@
 ﻿using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using UtilityBot.Contracts;
+using UtilityBot.Domain.Services.ConfigurationService.Interfaces;
 using UtilityBot.Services.ApiCallerServices;
 using UtilityBot.Services.CacheService;
 using UtilityBot.Services.GuildJoinedServices.Interfaces;
 
 namespace UtilityBot.Services.GuildJoinedServices.Managers;
 
-public class GuildJoinedManager : BaseApiCallService, IGuildJoinedManager
+public class GuildJoinedManager : IGuildJoinedManager
 {
     private readonly ICacheManager _cacheManager;
     private readonly DiscordSocketClient _client;
+    private readonly IConfigurationService _configurationService;
 
-    public GuildJoinedManager(IConfiguration configuration, ICacheManager cacheManager, DiscordSocketClient client) : base(configuration)
+    public GuildJoinedManager(ICacheManager cacheManager, DiscordSocketClient client, IConfigurationService configurationService) 
     {
         _cacheManager = cacheManager;
         _client = client;
+        _configurationService = configurationService;
         _client.Ready += ClientOnReady;
     }
 
@@ -37,11 +40,10 @@ public class GuildJoinedManager : BaseApiCallService, IGuildJoinedManager
         {
             var connectedServers = guilds.Select(x => new ConnectedServer(x.Id, x.Name)).ToList();
 
-            ServiceUrl = "configuration/get-servers-configuration";
+            var configuration = await _configurationService.GetConfigurationsOfConnectedServers(connectedServers);
+            var verifyConfiguration = await _configurationService.GetVerifyConfiguration();
 
-            var configuration = await RequestApi<Configuration>(connectedServers);
-
-            _cacheManager.InitializeCache(configuration);
+            _cacheManager.InitializeCache(configuration, verifyConfiguration);
         }
         catch (Exception e)
         {
@@ -53,14 +55,8 @@ public class GuildJoinedManager : BaseApiCallService, IGuildJoinedManager
     {
         var connectedServer = new ConnectedServer(guild.Id, guild.Name);
 
-        ServiceUrl = "configuration/get-server-configuration";
 
-        var configuration = await RequestApi<Configuration>(connectedServer);
-
-        if (configuration == null)
-        {
-            return;
-        }
+        var configuration = await _configurationService.GetConfigurationsOfConnectedServer(connectedServer);
 
         if (!configuration.UserJoinConfigurations.Any())
         {
@@ -69,6 +65,4 @@ public class GuildJoinedManager : BaseApiCallService, IGuildJoinedManager
 
         _cacheManager.UpdateCache(configuration);
     }
-
-    public override string? ServiceUrl { get; set; }
 }
