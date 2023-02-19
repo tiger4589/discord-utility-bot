@@ -235,6 +235,40 @@ public class ConfigurationService : IConfigurationService
         }
     }
 
+    public async Task AddLogConfiguration(ulong guildId, ulong channelId)
+    {
+        var logConfiguration = await _context.LogConfigurations!.SingleOrDefaultAsync(x => x.GuildId == guildId);
+        if (logConfiguration == null)
+        {
+            await _context.LogConfigurations!.AddAsync(new LogConfiguration
+            {
+                ChannelId = channelId,
+                GuildId = guildId
+            });
+        }
+        else
+        {
+            if (logConfiguration.ChannelId != channelId)
+            {
+                logConfiguration.ChannelId = channelId;
+            }
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<LogConfiguration?> GetLogConfiguration(ulong guildId)
+    {
+        return await _context.LogConfigurations!.SingleOrDefaultAsync(x => x.GuildId == guildId);
+    }
+
+    public async Task RemoveLogConfiguration()
+    {
+        var logConfigurations = await _context.LogConfigurations!.ToListAsync();
+        _context.LogConfigurations!.RemoveRange(logConfigurations);
+        await _context.SaveChangesAsync();
+    }
+
     private async Task UpdateExistingServer(JoinedServer joinedServer, ConnectedServer connectedServer, bool isSave = false)
     {
         joinedServer.IsConnected = true;

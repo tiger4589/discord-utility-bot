@@ -1,4 +1,9 @@
 ﻿using UtilityBot.Contracts;
+using UtilityBot.Domain.DomainObjects;
+using UserJoinConfiguration = UtilityBot.Contracts.UserJoinConfiguration;
+using UserJoinMessage = UtilityBot.Contracts.UserJoinMessage;
+using UserJoinRole = UtilityBot.Contracts.UserJoinRole;
+using VerifyConfiguration = UtilityBot.Contracts.VerifyConfiguration;
 
 namespace UtilityBot.Domain.Services.ConfigurationService.Interfaces;
 
@@ -14,4 +19,8 @@ public interface IConfigurationService
 
     Task RemoveUserJoinMessageConfiguration(ulong guildId);
     Task RemoveUserJoinRoleConfiguration(ulong guildId, ulong roleId);
+
+    Task AddLogConfiguration(ulong guildId, ulong channelId);
+    Task<LogConfiguration?> GetLogConfiguration(ulong guildId);
+    Task RemoveLogConfiguration();
 }

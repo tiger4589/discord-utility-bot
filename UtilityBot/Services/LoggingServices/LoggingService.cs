@@ -1,24 +1,41 @@
 ﻿using Discord.Commands;
 using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
+using UtilityBot.Domain.DomainObjects;
+using UtilityBot.Domain.Services.ConfigurationService.Interfaces;
+using UtilityBot.EventArguments;
+using UtilityBot.Services.CacheService;
+using System.Threading.Channels;
 
 namespace UtilityBot.Services.LoggingServices;
 
 public class LoggingService : ILoggingService
 {
     private readonly DiscordSocketClient _client;
+    private readonly ICacheManager _cacheManager;
+    private readonly IConfigurationService _configurationService;
+    private readonly IConfiguration _configuration;
 
-    public LoggingService(DiscordSocketClient client)
+    public LoggingService(DiscordSocketClient client, ICacheManager cacheManager, IConfigurationService configurationService, IConfiguration configuration)
     {
         _client = client;
+        _cacheManager = cacheManager;
+        _configurationService = configurationService;
+        _configuration = configuration;
         _client.Ready += InitializeService;
     }
 
-    public Task InitializeService()
+    public async Task InitializeService()
     {
+        var logConfiguration = await _configurationService.GetLogConfiguration(ulong.Parse(_configuration["ServerId"]!));
+        if (logConfiguration != null)
+        {
+            _cacheManager.AddOrUpdate(logConfiguration);
+        }
         _client.Log += LogAsync;
         _client.MessageReceived += MessageReceived;
-        return Task.CompletedTask;
     }
 
     private Task LogAsync(LogMessage message)
@@ -46,4 +63,73 @@ public class LoggingService : ILoggingService
 
         return Task.CompletedTask;
     }
+
+    public async Task Log(string message)
+    {
+        var logConfiguration = _cacheManager.GetLogConfiguration();
+        if (logConfiguration == null)
+        {
+            return;
+        }
+
+        var channel = await _client.GetChannelAsync(logConfiguration.ChannelId) as ITextChannel;
+        if (channel == null)
+        {
+            Console.WriteLine($"I can't find channel with id: {logConfiguration.ChannelId}");
+            return;
+        }
+
+        await channel.SendMessageAsync(message);
+    }
+
+    public async Task AddLogConfiguration(SocketInteractionContext context, ITextChannel channel)
+    {
+        try
+        {
+            var userMessage = await channel.SendMessageAsync("Test");
+            await userMessage.DeleteAsync();
+        }
+        catch
+        {
+            RaiseErrorOnLogConfiguration(new ConfigurationServiceEventArgs(context, "I can't send messages to this channel! FIX IT!"));
+            return;
+        }
+
+        await _configurationService.AddLogConfiguration(context.Guild.Id, channel.Id);
+        _cacheManager.AddOrUpdate(new LogConfiguration
+        {
+            ChannelId = channel.Id,
+            GuildId = context.Guild.Id
+        });
+        RaiseLogAddedEvent(new ConfigurationServiceEventArgs(context, $"Logs will be sent to {channel.Mention}"));
+    }
+
+    public async Task RemoveLogConfiguration(SocketInteractionContext context)
+    {
+        await _configurationService.RemoveLogConfiguration();
+        _cacheManager.Remove(new LogConfiguration());
+        RaiseLogRemovedEvent(new ConfigurationServiceEventArgs(context, $"Logs will no longer be sent"));
+    }
+
+    private protected void RaiseLogRemovedEvent(ConfigurationServiceEventArgs args)
+    {
+        var handler = LogConfigurationRemoved;
+        handler?.Invoke(this, args);
+    }
+
+    private protected void RaiseLogAddedEvent(ConfigurationServiceEventArgs args)
+    {
+        var handler = LogConfigurationAdded;
+        handler?.Invoke(this, args);
+    }
+
+    private protected void RaiseErrorOnLogConfiguration(ConfigurationServiceEventArgs args)
+    {
+        var handler = LogConfigurationError;
+        handler?.Invoke(this, args);
+    }
+
+    public event EventHandler<ConfigurationServiceEventArgs>? LogConfigurationAdded;
+    public event EventHandler<ConfigurationServiceEventArgs>? LogConfigurationRemoved;
+    public event EventHandler<ConfigurationServiceEventArgs>? LogConfigurationError;
 }

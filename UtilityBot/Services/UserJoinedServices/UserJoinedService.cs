@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 using UtilityBot.Contracts;
 using UtilityBot.Services.CacheService;
 
@@ -9,11 +10,13 @@ public class UserJoinedService : IUserJoinedService
 {
     private readonly ICacheManager _cahCacheManager;
     private readonly DiscordSocketClient _client;
+    private readonly IConfiguration _configuration;
 
-    public UserJoinedService(ICacheManager cahCacheManager, DiscordSocketClient client)
+    public UserJoinedService(ICacheManager cahCacheManager, DiscordSocketClient client, IConfiguration configuration)
     {
         _cahCacheManager = cahCacheManager;
         _client = client;
+        _configuration = configuration;
         _client.Ready += InitializeService;
     }
 
@@ -46,11 +49,11 @@ public class UserJoinedService : IUserJoinedService
         }
     }
 
-    private async Task SendMessageOnJoin(SocketGuildUser socketGuildUser, IList<UserJoinMessage> configUserJoinMessages)
+    private async Task SendMessageOnJoin(SocketGuildUser socketGuildUser, IList<UserJoinMessage> configUserJoinMessages, bool isForcedInPrivate = false)
     {
         foreach (var configUserJoinMessage in configUserJoinMessages)
         {
-            if (configUserJoinMessage.IsPrivate)
+            if (configUserJoinMessage.IsPrivate || isForcedInPrivate)
             {
                 await socketGuildUser.SendMessageAsync(configUserJoinMessage.Message);
             }
@@ -83,5 +86,30 @@ public class UserJoinedService : IUserJoinedService
     public async Task TriggerSendMessageOnJoin(IUser user)
     {
         await ClientOnUserJoined((SocketGuildUser)user);
+    }
+
+    public async Task TriggerAfterRestart(Configuration configuration)
+    {
+        var guild = _client.GetGuild(ulong.Parse(_configuration["ServerId"]!));
+        var users = guild.Users;
+
+        foreach (var user in users)
+        {
+            if ((user.Roles.Count == 1 && user.Roles.Single().IsEveryone) || user.Roles.Count == 0)
+            {
+                foreach (var userJoinConfiguration in configuration.UserJoinConfigurations)
+                {
+                    if (userJoinConfiguration.Action == ActionTypeNames.AddRole)
+                    {
+                        await AddRolesOnJoin(user, configuration.UserJoinRoles);
+                    }
+
+                    if (userJoinConfiguration.Action == ActionTypeNames.SendMessage)
+                    {
+                        await SendMessageOnJoin(user, configuration.UserJoinMessages, true);
+                    }
+                }
+            }
+        }
     }
 }

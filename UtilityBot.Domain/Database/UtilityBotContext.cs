@@ -15,7 +15,7 @@ public class UtilityBotContext : DbContext
     public DbSet<UserJoinMessage>? UserJoinMessages { get; set; }
     public DbSet<UserJoinRole>? UserJoinRoles { get; set; }
     public DbSet<VerifyConfiguration>? VerifyConfigurations { get; set; }
-
+    public DbSet<LogConfiguration>? LogConfigurations { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ConfiguredAction>().HasKey(x => new { x.GuildId, x.ConfigurationType });
