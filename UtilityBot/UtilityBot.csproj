@@ -17,6 +17,8 @@
     <Folder Include="Services\LoggingServices\" />
     <Folder Include="Services\ConfigurationServices\" />
     <Folder Include="Services\ApiCallerServices\" />
+    <Folder Include="Services\MessageHandlers\" />
+    <Folder Include="Services\ButtonHandlers\" />
     <Folder Include="Services\PlayerServices\" />
     <Folder Include="Services\UserJoinedServices\" />
   </ItemGroup>
@@ -34,6 +36,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />

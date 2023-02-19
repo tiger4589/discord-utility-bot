@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilityBot.Domain.Tests.Uni
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilityBot.Domain", "UtilityBot.Domain\UtilityBot.Domain.csproj", "{8F185250-1C7B-49EA-88A1-BD12E1394B84}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilityBot.Api", "UtilityBot.Api\UtilityBot.Api.csproj", "{D4E31645-5A4F-473E-ABDC-796773A36557}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{8F185250-1C7B-49EA-88A1-BD12E1394B84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F185250-1C7B-49EA-88A1-BD12E1394B84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F185250-1C7B-49EA-88A1-BD12E1394B84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4E31645-5A4F-473E-ABDC-796773A36557}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4E31645-5A4F-473E-ABDC-796773A36557}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4E31645-5A4F-473E-ABDC-796773A36557}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4E31645-5A4F-473E-ABDC-796773A36557}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

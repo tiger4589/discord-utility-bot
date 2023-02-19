@@ -1,16 +1,23 @@
 ﻿using Discord;
 using Discord.Interactions;
+using Discord.WebSocket;
 using UtilityBot.Services.CacheService;
+using UtilityBot.Services.LoggingServices;
+using UtilityBot.Services.MessageHandlers;
 
 namespace UtilityBot.Services.PlayerServices;
 
 public class PlayerService : IPlayerService
 {
     private readonly ICacheManager _cacheManager;
+    private readonly IEmbedMessageBuilder _embedMessageBuilder;
+    private readonly ILoggingService _loggingService;
 
-    public PlayerService(ICacheManager cacheManager)
+    public PlayerService(ICacheManager cacheManager, IEmbedMessageBuilder embedMessageBuilder, ILoggingService loggingService)
     {
         _cacheManager = cacheManager;
+        _embedMessageBuilder = embedMessageBuilder;
+        _loggingService = loggingService;
     }
 
     public async Task RequestVerification(SocketInteractionContext context, string recruitLink)
@@ -22,20 +29,35 @@ public class PlayerService : IPlayerService
             return;
         }
 
-        var channel = context.Guild.GetChannel(conf.ChannelId) as ITextChannel;
-        if (channel == null)
+        var socketGuildUser = context.User as SocketGuildUser;
+        if (socketGuildUser!.Roles.Any(x => x.Id == conf.RoleId))
         {
-            //raise an error in an owned channel or something
+            await context.Interaction.RespondAsync("You are already verified!", ephemeral: true);
             return;
         }
 
+        if (recruitLink.Split(' ').Length > 1 || !recruitLink.StartsWith("https://www.kingsofchaos.com/recruit.php?uniqid="))
+        {
+            await context.Interaction.RespondAsync("Invalid Recruit Link! Please use yours from your command center", ephemeral: true);
+            return;
+        }
+
+        var channel = context.Guild.GetChannel(conf.ChannelId) as ITextChannel;
+        if (channel == null)
+        {
+            await _loggingService.Log($"Can't find the channel to send verification request!");
+            return;
+        }
+
+        var embed  = _embedMessageBuilder.BuildVerificationEmbed(context.User, recruitLink);
+
         await channel.SendMessageAsync(
-            $"Will Change To An Embed! Verification Request! @<{context.User.Id}> {context.User.Username}: {recruitLink}",
+            embed: embed,   
             components: new ComponentBuilder()
-                .WithButton("Verify", "some-id", ButtonStyle.Success, new Emoji("\u2705"))
-                .WithButton("reject", "another-id", ButtonStyle.Danger, new Emoji("⛔"))
+                .WithButton("Verify", $"verify_{context.User.Id}", ButtonStyle.Success, new Emoji("\u2705"))
+                .WithButton("Reject", $"reject_{context.User.Id}", ButtonStyle.Danger, new Emoji("\u26D4"))
                 .Build());
 
-        await context.Interaction.RespondAsync("Moderators have been notified, please be patient.");
+        await context.Interaction.RespondAsync("Moderators have been notified, please be patient.", ephemeral: true);
     }
 }

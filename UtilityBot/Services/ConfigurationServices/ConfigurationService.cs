@@ -34,7 +34,7 @@ public class ConfigurationService : IConfigurationService
 
         await _configurationService.AddUserJoinRoleConfiguration(configuration.UserJoinConfiguration, configuration.UserJoinRole);
         _cacheManager.AddOrUpdate(configuration);
-        RaiseRoleConfiguredEvent(new ConfigurationServiceEventArgs(interactionContext));
+        RaiseRoleConfiguredEvent(new ConfigurationServiceEventArgs(interactionContext, $"Will be giving new user who join the following role: {socketRole.Name}"));
     }
 
     public async Task AddMessageToGuildOnJoin(SocketInteractionContext context, ulong guildId, string message, bool isPrivate,
@@ -46,10 +46,11 @@ public class ConfigurationService : IConfigurationService
             return;
         }
 
+        ITextChannel? channel = null;
         if (channelId != null && !isPrivate)
         {
             //todo: find a better way to check this
-            var channel = context.Guild.GetChannel(channelId.Value) as ITextChannel;
+            channel = context.Guild.GetChannel(channelId.Value) as ITextChannel;
             if (channel == null)
             {
                 RaiseErrorOnPublicMessage(new ConfigurationServiceEventArgs(context, "I can't see this channel!"));
@@ -76,7 +77,7 @@ public class ConfigurationService : IConfigurationService
         await _configurationService.AddUserJoinMessageConfiguration(configuration.UserJoinConfiguration,
             configuration.UserJoinMessage);
         _cacheManager.AddOrUpdate(configuration);
-        RaiseMessageConfigured(new ConfigurationServiceEventArgs(context));
+        RaiseMessageConfigured(new ConfigurationServiceEventArgs(context, $"Will send the following welcome message to users: {message}. IsPrivate: {isPrivate}, Channel: {(channel == null ? "No Channel" : channel.Name)}"));
     }
 
     public async Task AddVerifyConfiguration(SocketInteractionContext context, ulong channelId, ulong roleId)
@@ -112,7 +113,7 @@ public class ConfigurationService : IConfigurationService
         var configuration = new VerifyConfiguration(channelId, roleId);
         await _configurationService.AddVerifyConfiguration(configuration);
         _cacheManager.AddOrUpdate(configuration);
-        RaiseVerifyConfigurationEvent(new ConfigurationServiceEventArgs(context));
+        RaiseVerifyConfigurationEvent(new ConfigurationServiceEventArgs(context, $"Will send verification request to {channel.Name} and will give {socketRole.Name} upon acceptance."));
     }
 
     public async Task RemoveWelcomeMessage(SocketInteractionContext context)

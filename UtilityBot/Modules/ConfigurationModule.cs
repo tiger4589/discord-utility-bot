@@ -1,9 +1,8 @@
 ﻿using Discord;
 using Discord.Interactions;
-using System.Data;
-using Microsoft.Identity.Client;
 using UtilityBot.EventArguments;
 using UtilityBot.Services.ConfigurationServices;
+using UtilityBot.Services.LoggingServices;
 
 namespace UtilityBot.Modules;
 
@@ -70,7 +69,7 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
         private async void ConfigurationServiceOnRoleConfigured(object? sender, ConfigurationServiceEventArgs e)
         {
             await e.InteractionContext.Interaction.ModifyOriginalResponseAsync(prop =>
-                prop.Content = "Finished Configuring");
+                prop.Content = e.Message);
         }
     }
 
@@ -139,7 +138,7 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
         private async void ConfigurationServiceOnMessageConfigured(object? sender, ConfigurationServiceEventArgs e)
         {
             await e.InteractionContext.Interaction.ModifyOriginalResponseAsync(prop =>
-                prop.Content = "Finished Configuring!");
+                prop.Content = e.Message);
         }
 
         private async void ConfigurationServiceOnMessageRemoved(object? sender, ConfigurationServiceEventArgs e)
@@ -198,7 +197,7 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
         private protected async void OnVerifyConfigurationSet(object? sender, ConfigurationServiceEventArgs e)
         {
             await e.InteractionContext.Interaction.ModifyOriginalResponseAsync(prop =>
-                prop.Content = "Verify Configuration Added");
+                prop.Content = e.Message);
         }
 
         private protected async void ErrorPublicMessage(object? sender, ConfigurationServiceEventArgs e)
@@ -218,6 +217,67 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
         {
             await e.InteractionContext.Interaction.ModifyOriginalResponseAsync(prop =>
                 prop.Content = "I can't give a higher role than mine! Fix that before.");
+        }
+    }
+
+    [Group("log-configuration", "Bot log configuration")]
+    public class LogConfigurationModule : InteractionModuleBase<SocketInteractionContext>
+    {
+        private readonly ILoggingService _loggingService;
+
+        public LogConfigurationModule(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
+
+        [SlashCommand("add", "Add a channel so the bot can send us important logs there")]
+        public async Task AddLogConfiguration([Summary(description:"The channel to send logs to")] ITextChannel channel)
+        {
+            RemoveHandlers();
+            AddHandlers();
+            await RespondAsync($"Adding Log Configuration.");
+            _ = _loggingService.AddLogConfiguration(Context, channel);
+        }
+
+        [SlashCommand("remove", "Remove Current Log Configuration")]
+        public async Task RemoveLogConfiguration()
+        {
+            RemoveHandlers();
+            AddHandlers();
+            await RespondAsync($"Removing Log Configuration.");
+            _ = _loggingService.RemoveLogConfiguration(Context);
+        }
+
+        private void AddHandlers()
+        {
+            _loggingService.LogConfigurationRemoved += LoggingServiceOnLogConfigurationRemoved;
+            _loggingService.LogConfigurationAdded += LoggingServiceOnLogConfigurationAdded;
+            _loggingService.LogConfigurationError += LoggingServiceOnLogConfigurationError;
+        }
+
+        private async void LoggingServiceOnLogConfigurationError(object? sender, ConfigurationServiceEventArgs e)
+        {
+            await e.InteractionContext.Interaction.ModifyOriginalResponseAsync(prop =>
+                prop.Content = e.Message);
+        }
+
+        private async void LoggingServiceOnLogConfigurationAdded(object? sender, ConfigurationServiceEventArgs e)
+        {
+            await e.InteractionContext.Interaction.ModifyOriginalResponseAsync(prop =>
+                prop.Content = e.Message);
+        }
+
+        private async void LoggingServiceOnLogConfigurationRemoved(object? sender, ConfigurationServiceEventArgs e)
+        {
+            await e.InteractionContext.Interaction.ModifyOriginalResponseAsync(prop =>
+                prop.Content = e.Message);
+        }
+
+        private void RemoveHandlers()
+        {
+            _loggingService.LogConfigurationRemoved -= LoggingServiceOnLogConfigurationRemoved;
+            _loggingService.LogConfigurationAdded -= LoggingServiceOnLogConfigurationAdded;
+            _loggingService.LogConfigurationError -= LoggingServiceOnLogConfigurationError;
         }
     }
 }

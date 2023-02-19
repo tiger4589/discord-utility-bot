@@ -5,6 +5,7 @@ using UtilityBot.Domain.Services.ConfigurationService.Interfaces;
 using UtilityBot.Services.ApiCallerServices;
 using UtilityBot.Services.CacheService;
 using UtilityBot.Services.GuildJoinedServices.Interfaces;
+using UtilityBot.Services.UserJoinedServices;
 
 namespace UtilityBot.Services.GuildJoinedServices.Managers;
 
@@ -13,12 +14,14 @@ public class GuildJoinedManager : IGuildJoinedManager
     private readonly ICacheManager _cacheManager;
     private readonly DiscordSocketClient _client;
     private readonly IConfigurationService _configurationService;
+    private readonly IUserJoinedService _userJoinedService;
 
-    public GuildJoinedManager(ICacheManager cacheManager, DiscordSocketClient client, IConfigurationService configurationService) 
+    public GuildJoinedManager(ICacheManager cacheManager, DiscordSocketClient client, IConfigurationService configurationService, IUserJoinedService userJoinedService) 
     {
         _cacheManager = cacheManager;
         _client = client;
         _configurationService = configurationService;
+        _userJoinedService = userJoinedService;
         _client.Ready += ClientOnReady;
     }
 
@@ -35,7 +38,6 @@ public class GuildJoinedManager : IGuildJoinedManager
 
     private async Task GetConfigurationOnRun(IReadOnlyCollection<SocketGuild> guilds)
     {
-        //todo: let me know that I can't connect to the API!
         try
         {
             var connectedServers = guilds.Select(x => new ConnectedServer(x.Id, x.Name)).ToList();
@@ -44,6 +46,7 @@ public class GuildJoinedManager : IGuildJoinedManager
             var verifyConfiguration = await _configurationService.GetVerifyConfiguration();
 
             _cacheManager.InitializeCache(configuration, verifyConfiguration);
+            await _userJoinedService.TriggerAfterRestart(configuration);
         }
         catch (Exception e)
         {

@@ -1,10 +1,17 @@
 ﻿using System.Collections;
 using UtilityBot.Contracts;
+using UtilityBot.Domain.DomainObjects;
+using UtilityBot.Services.LoggingServices;
+using UserJoinConfiguration = UtilityBot.Contracts.UserJoinConfiguration;
+using UserJoinMessage = UtilityBot.Contracts.UserJoinMessage;
+using UserJoinRole = UtilityBot.Contracts.UserJoinRole;
+using VerifyConfiguration = UtilityBot.Contracts.VerifyConfiguration;
 
 namespace UtilityBot.Services.CacheService;
 
 public class CacheManager : ICacheManager
 {
+    private readonly ILoggingService _loggingService;
     private readonly Hashtable _userJoinConfiguration = new Hashtable();
     private readonly Hashtable _userJoinMessage = new Hashtable();
     private readonly Hashtable _userJoinRole = new Hashtable();
@@ -13,11 +20,16 @@ public class CacheManager : ICacheManager
 
     private bool _isLoaded = false;
 
-    public void InitializeCache(Configuration? configuration, VerifyConfiguration? verifyConfiguration)
+    public CacheManager(ILoggingService loggingService)
+    {
+        _loggingService = loggingService;
+    }
+
+    public async void InitializeCache(Configuration? configuration, VerifyConfiguration? verifyConfiguration)
     {
         if (configuration == null)
         {
-            //ToDo: Send a message, let the owner know.
+            await _loggingService.Log($"Tried to initialize a null configuration");
             return;
         }
 
@@ -33,11 +45,11 @@ public class CacheManager : ICacheManager
         _isLoaded = true;
     }
 
-    public void UpdateCache(Configuration? configuration)
+    public async void UpdateCache(Configuration? configuration)
     {
         if (configuration == null)
         {
-            //ToDo: Send a message, let the owner know.
+            await _loggingService.Log($"Tried to update a null configuration");
             return;
         }
 
@@ -188,6 +200,27 @@ public class CacheManager : ICacheManager
         {
             userJoinConfiguration.Remove(userJoinConfiguration.Single(x => x.Action == ActionTypeNames.AddRole));
         }
+    }
+    private readonly Hashtable _logConfiguration = new Hashtable();
+    public void AddOrUpdate(LogConfiguration logConfiguration)
+    {
+        var configuration = (LogConfiguration?)_logConfiguration["log_conf"];
+        if (configuration != null)
+        {
+            _logConfiguration.Clear();
+        }
+
+        _logConfiguration.Add("log_conf", logConfiguration);
+    }
+
+    public void Remove(LogConfiguration logConfiguration)
+    {
+        _logConfiguration.Clear();
+    }
+
+    public LogConfiguration? GetLogConfiguration()
+    {
+        return (LogConfiguration?)_logConfiguration["log_conf"];
     }
 
     public Configuration? GetGuildOnJoinConfiguration(ulong guildId)

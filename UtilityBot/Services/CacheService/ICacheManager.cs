@@ -1,4 +1,6 @@
 ﻿using UtilityBot.Contracts;
+using UtilityBot.Domain.DomainObjects;
+using VerifyConfiguration = UtilityBot.Contracts.VerifyConfiguration;
 
 namespace UtilityBot.Services.CacheService;
 
@@ -13,4 +15,7 @@ public interface ICacheManager
     VerifyConfiguration? GetVerifyConfiguration();
     void RemoveMessageConfiguration(ulong guildId);
     void RemoveRoleConfiguration(ulong guildId, ulong roleId);
+    void AddOrUpdate(LogConfiguration logConfiguration);
+    void Remove(LogConfiguration logConfiguration);
+    LogConfiguration? GetLogConfiguration();
 }

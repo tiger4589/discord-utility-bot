@@ -2,6 +2,7 @@
 using Discord.Interactions;
 using Discord.WebSocket;
 using System.Reflection;
+using Microsoft.Extensions.Configuration;
 
 namespace UtilityBot.Services.InteractionServiceManager;
 
@@ -9,12 +10,14 @@ public class InteractionServiceServices : IInteractionServiceServices
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly DiscordSocketClient _client;
+    private readonly IConfiguration _configuration;
     private InteractionService? _interactionService;
 
-    public InteractionServiceServices(IServiceProvider serviceProvider, DiscordSocketClient client)
+    public InteractionServiceServices(IServiceProvider serviceProvider, DiscordSocketClient client, IConfiguration configuration)
     {
         _serviceProvider = serviceProvider;
         _client = client;
+        _configuration = configuration;
         _client.Ready += InitializeService;
     }
 
@@ -22,9 +25,8 @@ public class InteractionServiceServices : IInteractionServiceServices
     {
         _interactionService = new InteractionService(_client);
         await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
-        //todo: register globally on release
-        //await _interactionService.RegisterCommandsToGuildAsync(686553421280575521); t45_server
-        await _interactionService.RegisterCommandsToGuildAsync(1072644346417000458);
+
+        await _interactionService.RegisterCommandsToGuildAsync(ulong.Parse(_configuration["ServerId"]!));
 
         _interactionService.SlashCommandExecuted += InteractionServiceOnSlashCommandExecuted;
 
