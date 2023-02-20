@@ -3,6 +3,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using UtilityBot.Contracts;
 using UtilityBot.Services.CacheService;
+using UtilityBot.Services.MessageHandlers;
 
 namespace UtilityBot.Services.UserJoinedServices;
 
@@ -11,12 +12,14 @@ public class UserJoinedService : IUserJoinedService
     private readonly ICacheManager _cahCacheManager;
     private readonly DiscordSocketClient _client;
     private readonly IConfiguration _configuration;
+    private readonly IMessageHandler _messageHandler;
 
-    public UserJoinedService(ICacheManager cahCacheManager, DiscordSocketClient client, IConfiguration configuration)
+    public UserJoinedService(ICacheManager cahCacheManager, DiscordSocketClient client, IConfiguration configuration, IMessageHandler messageHandler)
     {
         _cahCacheManager = cahCacheManager;
         _client = client;
         _configuration = configuration;
+        _messageHandler = messageHandler;
         _client.Ready += InitializeService;
     }
 
@@ -53,9 +56,10 @@ public class UserJoinedService : IUserJoinedService
     {
         foreach (var configUserJoinMessage in configUserJoinMessages)
         {
+            var message = _messageHandler.ReplacePlaceHolders(configUserJoinMessage.Message, socketGuildUser);
             if (configUserJoinMessage.IsPrivate || isForcedInPrivate)
             {
-                await socketGuildUser.SendMessageAsync(configUserJoinMessage.Message);
+                await socketGuildUser.SendMessageAsync(message);
             }
             else
             {
@@ -70,7 +74,7 @@ public class UserJoinedService : IUserJoinedService
                     continue;
                 }
 
-                await channel.SendMessageAsync($"<@{socketGuildUser.Id}>: {configUserJoinMessage.Message}");
+                await channel.SendMessageAsync(message);
             }
         }
     }

@@ -8,6 +8,7 @@ using UtilityBot.Domain.Services.ConfigurationService.Interfaces;
 using UtilityBot.EventArguments;
 using UtilityBot.Services.CacheService;
 using System.Threading.Channels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace UtilityBot.Services.LoggingServices;
 
@@ -18,12 +19,12 @@ public class LoggingService : ILoggingService
     private readonly IConfigurationService _configurationService;
     private readonly IConfiguration _configuration;
 
-    public LoggingService(DiscordSocketClient client, ICacheManager cacheManager, IConfigurationService configurationService, IConfiguration configuration)
+    public LoggingService(DiscordSocketClient client, IServiceProvider serviceProvider)
     {
         _client = client;
-        _cacheManager = cacheManager;
-        _configurationService = configurationService;
-        _configuration = configuration;
+        _cacheManager = serviceProvider.GetRequiredService<ICacheManager>();
+        _configurationService = serviceProvider.GetRequiredService<IConfigurationService>();
+        _configuration = serviceProvider.GetRequiredService<IConfiguration>();
         _client.Ready += InitializeService;
     }
 
@@ -63,25 +64,7 @@ public class LoggingService : ILoggingService
 
         return Task.CompletedTask;
     }
-
-    public async Task Log(string message)
-    {
-        var logConfiguration = _cacheManager.GetLogConfiguration();
-        if (logConfiguration == null)
-        {
-            return;
-        }
-
-        var channel = await _client.GetChannelAsync(logConfiguration.ChannelId) as ITextChannel;
-        if (channel == null)
-        {
-            Console.WriteLine($"I can't find channel with id: {logConfiguration.ChannelId}");
-            return;
-        }
-
-        await channel.SendMessageAsync(message);
-    }
-
+    
     public async Task AddLogConfiguration(SocketInteractionContext context, ITextChannel channel)
     {
         try

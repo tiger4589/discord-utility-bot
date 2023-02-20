@@ -11,13 +11,11 @@ public class PlayerService : IPlayerService
 {
     private readonly ICacheManager _cacheManager;
     private readonly IEmbedMessageBuilder _embedMessageBuilder;
-    private readonly ILoggingService _loggingService;
 
-    public PlayerService(ICacheManager cacheManager, IEmbedMessageBuilder embedMessageBuilder, ILoggingService loggingService)
+    public PlayerService(ICacheManager cacheManager, IEmbedMessageBuilder embedMessageBuilder)
     {
         _cacheManager = cacheManager;
         _embedMessageBuilder = embedMessageBuilder;
-        _loggingService = loggingService;
     }
 
     public async Task RequestVerification(SocketInteractionContext context, string recruitLink)
@@ -45,7 +43,7 @@ public class PlayerService : IPlayerService
         var channel = context.Guild.GetChannel(conf.ChannelId) as ITextChannel;
         if (channel == null)
         {
-            await _loggingService.Log($"Can't find the channel to send verification request!");
+            await Logger.Log($"Can't find the channel to send verification request!");
             return;
         }
 

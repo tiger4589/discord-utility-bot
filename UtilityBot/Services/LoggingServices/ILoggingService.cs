@@ -6,8 +6,6 @@ namespace UtilityBot.Services.LoggingServices;
 
 public interface ILoggingService
 {
-    Task Log(string message);
-
     Task AddLogConfiguration(SocketInteractionContext context, ITextChannel channel);
     Task RemoveLogConfiguration(SocketInteractionContext context);
 
