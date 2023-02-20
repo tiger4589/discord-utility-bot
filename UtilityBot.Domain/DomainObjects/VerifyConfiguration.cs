@@ -8,4 +8,6 @@ public class VerifyConfiguration
     public int Id { get; set; }
     public ulong ChannelId { get; set; }
     public ulong RoleId { get; set; }
+
+    public string? Message { get; set; }
 }

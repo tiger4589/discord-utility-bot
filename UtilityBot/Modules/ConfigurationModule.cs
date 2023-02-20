@@ -172,12 +172,13 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
         }
 
         [SlashCommand("add", "Add Verify Configuration")]
-        public async Task AddVerifyConfiguration(ITextChannel channel, IRole role)
+        public async Task AddVerifyConfiguration([Summary(description:"Which channel should I send verification to?")]ITextChannel channel, [Summary(description:"Which role should I give in case of acceptance?")]IRole role,
+            [Summary(description:"Optional Message To Send To The User upon acceptance")] string message = "")
         {
             RemoveHandlers();
             AddHandlers();
             await RespondAsync($"Configuring verify behavior!");
-            _ = _configurationService.AddVerifyConfiguration(Context, channel.Id, role.Id);
+            _ = _configurationService.AddVerifyConfiguration(Context, channel.Id, role.Id, message);
         }
 
         private void AddHandlers()

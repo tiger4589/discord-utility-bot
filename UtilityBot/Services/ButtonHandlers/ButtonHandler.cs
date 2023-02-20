@@ -3,6 +3,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using UtilityBot.Services.CacheService;
 using UtilityBot.Services.LoggingServices;
+using UtilityBot.Services.MessageHandlers;
 
 namespace UtilityBot.Services.ButtonHandlers;
 
@@ -11,12 +12,14 @@ public class ButtonHandler : IButtonHandler
     private readonly DiscordSocketClient _client;
     private readonly ICacheManager _cacheManager;
     private readonly IConfiguration _configuration;
+    private readonly IMessageHandler _messageHandler;
 
-    public ButtonHandler(DiscordSocketClient client, ICacheManager cacheManager, IConfiguration configuration)
+    public ButtonHandler(DiscordSocketClient client, ICacheManager cacheManager, IConfiguration configuration, IMessageHandler messageHandler)
     {
         _client = client;
         _cacheManager = cacheManager;
         _configuration = configuration;
+        _messageHandler = messageHandler;
         _client.ButtonExecuted += ClientOnButtonExecuted;
     }
 
@@ -41,6 +44,7 @@ public class ButtonHandler : IButtonHandler
                 await Logger.Log("Verification Configuration is null.. pretty weird.. eh");
                 return;
             }
+
             var userId = ulong.Parse(data[1]);
 
             var guild = _client.GetGuild(ulong.Parse(_configuration["ServerId"]!));
@@ -52,6 +56,11 @@ public class ButtonHandler : IButtonHandler
             }
 
             await user.AddRoleAsync(verifyConfiguration.RoleId);
+
+            if (!string.IsNullOrWhiteSpace(verifyConfiguration.Message))
+            {
+                await user.SendMessageAsync(_messageHandler.ReplacePlaceHolders(verifyConfiguration.Message, user));
+            }
 
             if (onJoinRoleConfiguration != null)
             {
