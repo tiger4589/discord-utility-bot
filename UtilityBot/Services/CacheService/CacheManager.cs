@@ -11,7 +11,6 @@ namespace UtilityBot.Services.CacheService;
 
 public class CacheManager : ICacheManager
 {
-    private readonly ILoggingService _loggingService;
     private readonly Hashtable _userJoinConfiguration = new Hashtable();
     private readonly Hashtable _userJoinMessage = new Hashtable();
     private readonly Hashtable _userJoinRole = new Hashtable();
@@ -20,16 +19,11 @@ public class CacheManager : ICacheManager
 
     private bool _isLoaded = false;
 
-    public CacheManager(ILoggingService loggingService)
-    {
-        _loggingService = loggingService;
-    }
-
     public async void InitializeCache(Configuration? configuration, VerifyConfiguration? verifyConfiguration)
     {
         if (configuration == null)
         {
-            await _loggingService.Log($"Tried to initialize a null configuration");
+            await Logger.Log($"Tried to initialize a null configuration");
             return;
         }
 
@@ -49,7 +43,7 @@ public class CacheManager : ICacheManager
     {
         if (configuration == null)
         {
-            await _loggingService.Log($"Tried to update a null configuration");
+            await Logger.Log($"Tried to update a null configuration");
             return;
         }
 

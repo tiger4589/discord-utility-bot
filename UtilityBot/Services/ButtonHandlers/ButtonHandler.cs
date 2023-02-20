@@ -11,14 +11,12 @@ public class ButtonHandler : IButtonHandler
     private readonly DiscordSocketClient _client;
     private readonly ICacheManager _cacheManager;
     private readonly IConfiguration _configuration;
-    private readonly ILoggingService _loggingService;
 
-    public ButtonHandler(DiscordSocketClient client, ICacheManager cacheManager, IConfiguration configuration, ILoggingService loggingService)
+    public ButtonHandler(DiscordSocketClient client, ICacheManager cacheManager, IConfiguration configuration)
     {
         _client = client;
         _cacheManager = cacheManager;
         _configuration = configuration;
-        _loggingService = loggingService;
         _client.ButtonExecuted += ClientOnButtonExecuted;
     }
 
@@ -27,7 +25,7 @@ public class ButtonHandler : IButtonHandler
         var customId = arg.Data.CustomId;
         if (customId == null)
         {
-            await _loggingService.Log("A Button was clicked, but it doesn't contain a custom id.. really weird.");
+            await Logger.Log("A Button was clicked, but it doesn't contain a custom id.. really weird.");
             return;
         }
 
@@ -40,7 +38,7 @@ public class ButtonHandler : IButtonHandler
         {
             if (verifyConfiguration == null)
             {
-                await _loggingService.Log("Verification Configuration is null.. pretty weird.. eh");
+                await Logger.Log("Verification Configuration is null.. pretty weird.. eh");
                 return;
             }
             var userId = ulong.Parse(data[1]);
@@ -49,7 +47,7 @@ public class ButtonHandler : IButtonHandler
             var user =  guild.GetUser(userId) as SocketGuildUser;
             if (user == null)
             {
-                await _loggingService.Log($"Couldn't find the user with id {userId} upon verification");
+                await Logger.Log($"Couldn't find the user with id {userId} upon verification");
                 return;
             }
 

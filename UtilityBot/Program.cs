@@ -19,7 +19,7 @@ using UtilityBot.Services.PlayerServices;
 using UtilityBot.Services.UserJoinedServices;
 
 var serviceProvider = BuildServiceProvider();
-InitializeMainComponents(serviceProvider);
+InitializeMainComponents();
 
 var context = serviceProvider.GetRequiredService<UtilityBotContext>();
 context.Database.Migrate();
@@ -60,17 +60,20 @@ IServiceProvider BuildServiceProvider() => new ServiceCollection()
     .AddSingleton<IButtonHandler, ButtonHandler>()
     .AddSingleton<BotClient>()
     .AddSingleton<UtilityBot.Domain.Services.ConfigurationService.Interfaces.IConfigurationService, UtilityBot.Domain.Services.ConfigurationService.Services.ConfigurationService>()
+    .AddSingleton<IMessageHandler, MessageHandler>()
     .AddAutoMapper(typeof(ServerMappingProfile))
     .AddTransient<ILogger>(_ => new LoggerConfiguration().MinimumLevel.Warning().WriteTo.File("logs\\log-.txt", rollingInterval: RollingInterval.Hour,
         shared: true, retainedFileCountLimit: 72).CreateLogger())
     .BuildServiceProvider();
 
-void InitializeMainComponents(IServiceProvider serviceProvider1)
+void InitializeMainComponents()
 {
     serviceProvider.GetRequiredService<IGuildJoinedManager>();
     serviceProvider.GetRequiredService<ILoggingService>();
     serviceProvider.GetRequiredService<IInteractionServiceServices>();
     serviceProvider.GetRequiredService<IUserJoinedService>();
     serviceProvider.GetRequiredService<IButtonHandler>();
+
+    Logger.InitializeLogger(serviceProvider.GetRequiredService<ICacheManager>(), serviceProvider.GetRequiredService<DiscordSocketClient>());
 }
 
