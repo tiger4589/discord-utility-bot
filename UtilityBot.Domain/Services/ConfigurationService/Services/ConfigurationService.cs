@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Xml;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using UtilityBot.Contracts;
 using UtilityBot.Domain.Database;
@@ -17,6 +15,10 @@ public class ConfigurationService : IConfigurationService
 {
     private readonly UtilityBotContext _context;
     private readonly IMapper _mapper;
+
+    private const string Insert = "INSERT";
+    private const string Update = "UPDATE";
+    private const string Delete = "DELETE";
 
     public ConfigurationService(UtilityBotContext context, IMapper mapper)
     {
@@ -108,6 +110,14 @@ public class ConfigurationService : IConfigurationService
                 Action = userJoinConfiguration.Action,
                 GuildId = userJoinConfiguration.GuildId
             });
+
+            await _context.UserJoinConfigurationsAudit!.AddAsync(new UserJoinConfigurationAudit
+            {
+                Action = userJoinConfiguration.Action,
+                CreationDate = DateTime.Now,
+                GuildId = userJoinConfiguration.GuildId,
+                UpdateType = Insert
+            });
         }
 
         if (alreadyExistingJoinRole == null)
@@ -115,6 +125,14 @@ public class ConfigurationService : IConfigurationService
             await _context.UserJoinRoles!.AddAsync(new DomainObjects.UserJoinRole
             {
                 RoleId = userJoinRole.RoleId,
+                GuildId = userJoinRole.GuildId
+            });
+
+            await _context.UserJoinRoleAudits!.AddAsync(new UserJoinRoleAudit
+            {
+                CreationDate = DateTime.Now,
+                RoleId = userJoinRole.RoleId,
+                UpdateType = Insert,
                 GuildId = userJoinRole.GuildId
             });
         }
@@ -137,12 +155,30 @@ public class ConfigurationService : IConfigurationService
                 GuildId = userJoinConfiguration.GuildId
             });
 
+            await _context.UserJoinConfigurationsAudit!.AddAsync(new UserJoinConfigurationAudit
+            {
+                Action = userJoinConfiguration.Action,
+                CreationDate = DateTime.Now,
+                GuildId = userJoinConfiguration.GuildId,
+                UpdateType = Insert
+            });
+
             await _context.UserJoinMessages!.AddAsync(new DomainObjects.UserJoinMessage
             {
                 Message = userJoinMessage.Message,
                 GuildId = userJoinMessage.GuildId,
                 ChannelId = userJoinMessage.ChannelId,
                 IsPrivate = userJoinMessage.IsPrivate
+            });
+
+            await _context.UserJoinMessageAudits!.AddAsync(new UserJoinMessageAudit
+            {
+                ChannelId = userJoinMessage.ChannelId,
+                CreationDate = DateTime.Now,
+                GuildId = userJoinMessage.GuildId,
+                UpdateType = Insert,
+                IsPrivate = userJoinMessage.IsPrivate,
+                Message = userJoinMessage.Message
             });
 
             await _context.SaveChangesAsync();
@@ -156,10 +192,27 @@ public class ConfigurationService : IConfigurationService
                 Action = userJoinConfiguration.Action,
                 GuildId = userJoinConfiguration.GuildId
             });
+
+            await _context.UserJoinConfigurationsAudit!.AddAsync(new UserJoinConfigurationAudit
+            {
+                Action = userJoinConfiguration.Action,
+                CreationDate = DateTime.Now,
+                GuildId = userJoinConfiguration.GuildId,
+                UpdateType = Insert
+            });
         }
 
         if (alreadyExistingJoinMessage != null)
         {
+            await _context.UserJoinMessageAudits!.AddAsync(new UserJoinMessageAudit
+            {
+                ChannelId = alreadyExistingJoinMessage.ChannelId,
+                CreationDate = DateTime.Now,
+                GuildId = alreadyExistingJoinMessage.GuildId,
+                UpdateType = Update,
+                IsPrivate = alreadyExistingJoinMessage.IsPrivate,
+                Message = alreadyExistingJoinMessage.Message
+            });
 
             alreadyExistingJoinMessage.ChannelId = userJoinMessage.ChannelId;
             alreadyExistingJoinMessage.IsPrivate = userJoinMessage.IsPrivate;
@@ -174,6 +227,15 @@ public class ConfigurationService : IConfigurationService
         var conf = await _context.VerifyConfigurations!.SingleOrDefaultAsync();
         if (conf != null)
         {
+
+            await _context.VerifyConfigurationAudits!.AddAsync(new VerifyConfigurationAudit
+            {
+                RoleId = conf.RoleId,
+                ChannelId = conf.ChannelId,
+                CreationDate = DateTime.Now,
+                UpdateType = Update
+            });
+
             conf.RoleId = verifyConfiguration.RoleId;
             conf.ChannelId = verifyConfiguration.ChannelId;
         }
@@ -183,6 +245,14 @@ public class ConfigurationService : IConfigurationService
             {
                 RoleId = verifyConfiguration.RoleId,
                 ChannelId = verifyConfiguration.ChannelId
+            });
+
+            await _context.VerifyConfigurationAudits!.AddAsync(new VerifyConfigurationAudit
+            {
+                RoleId = verifyConfiguration.RoleId,
+                ChannelId = verifyConfiguration.ChannelId,
+                CreationDate = DateTime.Now,
+                UpdateType = Insert
             });
         }
 
@@ -196,6 +266,17 @@ public class ConfigurationService : IConfigurationService
 
         if (userJoinConfigurations.Any())
         {
+            foreach (var configuration in userJoinConfigurations)
+            {
+                await _context.UserJoinConfigurationsAudit!.AddAsync(new UserJoinConfigurationAudit
+                {
+                    Action = configuration.Action,
+                    CreationDate = DateTime.Now,
+                    GuildId = configuration.GuildId,
+                    UpdateType = Delete
+                });
+            }
+
             _context.UserJoinConfigurations!.RemoveRange(userJoinConfigurations);
         }
 
@@ -203,6 +284,19 @@ public class ConfigurationService : IConfigurationService
 
         if (userJoinMessages.Any())
         {
+            foreach (var userJoinMessage in userJoinMessages)
+            {
+                await _context.UserJoinMessageAudits!.AddAsync(new UserJoinMessageAudit
+                {
+                    ChannelId = userJoinMessage.ChannelId,
+                    CreationDate = DateTime.Now,
+                    GuildId = userJoinMessage.GuildId,
+                    UpdateType = Delete,
+                    IsPrivate = userJoinMessage.IsPrivate,
+                    Message = userJoinMessage.Message
+                });
+            }
+
             _context.UserJoinMessages!.RemoveRange(userJoinMessages);
         }
 
@@ -216,6 +310,17 @@ public class ConfigurationService : IConfigurationService
 
         if (userJoinRoles.Any(x => x.RoleId == roleId))
         {
+            foreach (var role in userJoinRoles)
+            {
+                await _context.UserJoinRoleAudits!.AddAsync(new UserJoinRoleAudit
+                {
+                    CreationDate = DateTime.Now,
+                    RoleId = role.RoleId,
+                    UpdateType = Delete,
+                    GuildId = role.GuildId
+                });
+            }
+
             _context.UserJoinRoles!.RemoveRange(userJoinRoles.Where(x=>x.RoleId == roleId));
         }
 
@@ -230,6 +335,17 @@ public class ConfigurationService : IConfigurationService
 
         if (userJoinConfigurations.Any())
         {
+            foreach (var configuration in userJoinConfigurations)
+            {
+                await _context.UserJoinConfigurationsAudit!.AddAsync(new UserJoinConfigurationAudit
+                {
+                    Action = configuration.Action,
+                    CreationDate = DateTime.Now,
+                    GuildId = configuration.GuildId,
+                    UpdateType = Delete
+                });
+            }
+
             _context.UserJoinConfigurations!.RemoveRange(userJoinConfigurations);
             await _context.SaveChangesAsync();
         }
@@ -245,9 +361,25 @@ public class ConfigurationService : IConfigurationService
                 ChannelId = channelId,
                 GuildId = guildId
             });
+
+            await _context.LogConfigurationsAudit!.AddAsync(new LogConfigurationAudit
+            {
+                GuildId = guildId,
+                ChannelId = channelId,
+                CreationDate = DateTime.Now,
+                UpdateType = Insert
+            });
         }
         else
         {
+            await _context.LogConfigurationsAudit!.AddAsync(new LogConfigurationAudit
+            {
+                GuildId = logConfiguration.GuildId,
+                ChannelId = logConfiguration.ChannelId,
+                CreationDate = DateTime.Now,
+                UpdateType = Update
+            });
+
             if (logConfiguration.ChannelId != channelId)
             {
                 logConfiguration.ChannelId = channelId;
@@ -265,6 +397,18 @@ public class ConfigurationService : IConfigurationService
     public async Task RemoveLogConfiguration()
     {
         var logConfigurations = await _context.LogConfigurations!.ToListAsync();
+
+        foreach (var configuration in logConfigurations)
+        {
+            await _context.LogConfigurationsAudit!.AddAsync(new LogConfigurationAudit
+            {
+                GuildId = configuration.GuildId,
+                ChannelId = configuration.ChannelId,
+                CreationDate = DateTime.Now,
+                UpdateType = Delete
+            });
+        }
+
         _context.LogConfigurations!.RemoveRange(logConfigurations);
         await _context.SaveChangesAsync();
     }
