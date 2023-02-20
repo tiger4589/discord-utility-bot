@@ -88,7 +88,7 @@ public class ConfigurationService : IConfigurationService
             return null;
         }
 
-        return new VerifyConfiguration(conf.ChannelId, conf.RoleId);
+        return new VerifyConfiguration(conf.ChannelId, conf.RoleId, conf.Message);
     }
 
     public async Task AddUserJoinRoleConfiguration(UserJoinConfiguration userJoinConfiguration, UserJoinRole userJoinRole)
@@ -227,24 +227,26 @@ public class ConfigurationService : IConfigurationService
         var conf = await _context.VerifyConfigurations!.SingleOrDefaultAsync();
         if (conf != null)
         {
-
             await _context.VerifyConfigurationAudits!.AddAsync(new VerifyConfigurationAudit
             {
                 RoleId = conf.RoleId,
                 ChannelId = conf.ChannelId,
                 CreationDate = DateTime.Now,
-                UpdateType = Update
+                UpdateType = Update,
+                Message = conf.Message
             });
 
             conf.RoleId = verifyConfiguration.RoleId;
             conf.ChannelId = verifyConfiguration.ChannelId;
+            conf.Message = verifyConfiguration.Message;
         }
         else
         {
             await _context.VerifyConfigurations!.AddAsync(new DomainObjects.VerifyConfiguration
             {
                 RoleId = verifyConfiguration.RoleId,
-                ChannelId = verifyConfiguration.ChannelId
+                ChannelId = verifyConfiguration.ChannelId,
+                Message = verifyConfiguration.Message
             });
 
             await _context.VerifyConfigurationAudits!.AddAsync(new VerifyConfigurationAudit
@@ -252,7 +254,8 @@ public class ConfigurationService : IConfigurationService
                 RoleId = verifyConfiguration.RoleId,
                 ChannelId = verifyConfiguration.ChannelId,
                 CreationDate = DateTime.Now,
-                UpdateType = Insert
+                UpdateType = Insert,
+                Message = verifyConfiguration.Message
             });
         }
 

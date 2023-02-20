@@ -7,7 +7,7 @@ public interface IConfigurationService
 {
     Task AddRoleToGuildOnJoin(SocketInteractionContext interactionContext, ulong guildId, ulong roleId);
     Task AddMessageToGuildOnJoin(SocketInteractionContext context, ulong guildId, string message, bool isPrivate, ulong? channelId);
-    Task AddVerifyConfiguration(SocketInteractionContext context, ulong channelId, ulong roleId);
+    Task AddVerifyConfiguration(SocketInteractionContext context, ulong channelId, ulong roleId, string? message);
     Task RemoveWelcomeMessage(SocketInteractionContext context);
     Task RemoveOnJoinRole(SocketInteractionContext context, ulong roleId);
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UtilityBot.Domain.Database;
 
@@ -11,9 +12,11 @@ using UtilityBot.Domain.Database;
 namespace UtilityBot.Domain.Migrations
 {
     [DbContext(typeof(UtilityBotContext))]
-    partial class UtilityBotContextModelSnapshot : ModelSnapshot
+    [Migration("20230220214155_adding-verify-message")]
+    partial class addingverifymessage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

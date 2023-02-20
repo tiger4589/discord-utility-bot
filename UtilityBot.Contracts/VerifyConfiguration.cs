@@ -1,3 +1,3 @@
 ﻿namespace UtilityBot.Contracts;
 
-public record VerifyConfiguration(ulong ChannelId, ulong RoleId);
+public record VerifyConfiguration(ulong ChannelId, ulong RoleId, string? Message);

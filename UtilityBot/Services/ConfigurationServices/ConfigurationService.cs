@@ -80,9 +80,8 @@ public class ConfigurationService : IConfigurationService
         RaiseMessageConfigured(new ConfigurationServiceEventArgs(context, $"Will send the following welcome message to users: {message}. IsPrivate: {isPrivate}, Channel: {(channel == null ? "No Channel" : channel.Name)}"));
     }
 
-    public async Task AddVerifyConfiguration(SocketInteractionContext context, ulong channelId, ulong roleId)
+    public async Task AddVerifyConfiguration(SocketInteractionContext context, ulong channelId, ulong roleId, string? message)
     {
-
         var channel = context.Guild.GetChannel(channelId) as ITextChannel;
         if (channel == null)
         {
@@ -110,7 +109,7 @@ public class ConfigurationService : IConfigurationService
             return;
         }
 
-        var configuration = new VerifyConfiguration(channelId, roleId);
+        var configuration = new VerifyConfiguration(channelId, roleId, message);
         await _configurationService.AddVerifyConfiguration(configuration);
         _cacheManager.AddOrUpdate(configuration);
         RaiseVerifyConfigurationEvent(new ConfigurationServiceEventArgs(context, $"Will send verification request to {channel.Name} and will give {socketRole.Name} upon acceptance."));
