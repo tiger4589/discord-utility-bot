@@ -1,4 +1,6 @@
-﻿using Discord.Interactions;
+﻿using Discord;
+using Discord.Interactions;
+using UtilityBot.Domain.DomainObjects;
 using UtilityBot.EventArguments;
 
 namespace UtilityBot.Services.ConfigurationServices;
@@ -10,7 +12,9 @@ public interface IConfigurationService
     Task AddVerifyConfiguration(SocketInteractionContext context, ulong channelId, ulong roleId, string? message);
     Task RemoveWelcomeMessage(SocketInteractionContext context);
     Task RemoveOnJoinRole(SocketInteractionContext context, ulong roleId);
+    Task AddVerifyMessageConfiguration(SocketInteractionContext context, IRole role, string message);
 
+    public event EventHandler<ConfigurationServiceEventArgs> VerifyMessageConfigured; 
     public event EventHandler<ConfigurationServiceEventArgs> RoleConfigured;
     public event EventHandler<ConfigurationServiceEventArgs> RoleRemoved;
     public event EventHandler<ConfigurationServiceEventArgs> ErrorOnRole;

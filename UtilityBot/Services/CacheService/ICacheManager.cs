@@ -18,4 +18,11 @@ public interface ICacheManager
     void AddOrUpdate(LogConfiguration logConfiguration);
     void Remove(LogConfiguration logConfiguration);
     LogConfiguration? GetLogConfiguration();
+
+    VerifyMessageConfiguration? GetVerifyMessageConfiguration();
+    void AddOrUpdate(VerifyMessageConfiguration verifyMessageConfiguration);
+
+    void AddOrUpdate(JokeConfiguration jokeConfiguration);
+    IList<JokeConfiguration> GetJokeConfigurations();
+    JokeConfiguration? GetJokeConfiguration(EJokeType jokeType);
 }

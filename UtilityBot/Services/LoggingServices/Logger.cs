@@ -31,13 +31,14 @@ public static class Logger
         var logConfiguration = _cacheManager.GetLogConfiguration();
         if (logConfiguration == null)
         {
+            Console.WriteLine($"Logging configuration is not set, logging here: {message}");
             return;
         }
 
         var channel = await _client.GetChannelAsync(logConfiguration.ChannelId) as ITextChannel;
         if (channel == null)
         {
-            Console.WriteLine($"I can't find channel with id: {logConfiguration.ChannelId}");
+            Console.WriteLine($"I can't find channel with id: {logConfiguration.ChannelId}, logging here: {message}");
             return;
         }
 

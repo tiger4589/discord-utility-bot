@@ -1,9 +1,13 @@
-﻿using Azure.Core;
-using Discord;
+﻿using Discord;
 using Discord.Interactions;
 using UtilityBot.Contracts;
+using UtilityBot.Domain.DomainObjects;
 using UtilityBot.EventArguments;
 using UtilityBot.Services.CacheService;
+using UserJoinConfiguration = UtilityBot.Contracts.UserJoinConfiguration;
+using UserJoinMessage = UtilityBot.Contracts.UserJoinMessage;
+using UserJoinRole = UtilityBot.Contracts.UserJoinRole;
+using VerifyConfiguration = UtilityBot.Contracts.VerifyConfiguration;
 
 namespace UtilityBot.Services.ConfigurationServices;
 
@@ -25,7 +29,7 @@ public class ConfigurationService : IConfigurationService
 
         var myRoles = interactionContext.Guild.CurrentUser.Roles;
         var socketRole = interactionContext.Guild.GetRole(roleId);
-
+        
         if (myRoles.All(x => x.Position <= socketRole.Position))
         {
             RaiseErrorOnRole(new ConfigurationServiceEventArgs(interactionContext));
@@ -131,6 +135,19 @@ public class ConfigurationService : IConfigurationService
         RaiseRoleRemoved(new ConfigurationServiceEventArgs(context));
     }
 
+    public async Task AddVerifyMessageConfiguration(SocketInteractionContext context, IRole role, string message)
+    {
+        await _configurationService.AddOrUpdateVerifyMessageConfiguration(context.Guild.Id, role.Id, message);
+        _cacheManager.AddOrUpdate(new VerifyMessageConfiguration
+        {
+            GuildId = context.Guild.Id,
+            RoleId = role.Id,
+            Message = message
+        });
+
+        RaiseVerifyMessageConfigured(new ConfigurationServiceEventArgs(context, $"Role to mention: {role.Mention} {Environment.NewLine} Message: {message}"));
+    }
+
     private protected void RaiseVerifyConfigurationEvent(ConfigurationServiceEventArgs args)
     {
         var handler = VerifyConfigurationSet;
@@ -173,6 +190,12 @@ public class ConfigurationService : IConfigurationService
         handler?.Invoke(this, args);
     }
 
+    private protected void RaiseVerifyMessageConfigured(ConfigurationServiceEventArgs args)
+    {
+        var handler = VerifyMessageConfigured;
+        handler?.Invoke(this, args);
+    }
+
     public event EventHandler<ConfigurationServiceEventArgs>? RoleConfigured;
     public event EventHandler<ConfigurationServiceEventArgs>? RoleRemoved;
     public event EventHandler<ConfigurationServiceEventArgs>? MessageConfigured;
@@ -180,4 +203,5 @@ public class ConfigurationService : IConfigurationService
     public event EventHandler<ConfigurationServiceEventArgs>? VerifyConfigurationSet;
     public event EventHandler<ConfigurationServiceEventArgs>? ErrorOnRole;
     public event EventHandler<ConfigurationServiceEventArgs>? MessageRemoved;
+    public event EventHandler<ConfigurationServiceEventArgs>? VerifyMessageConfigured;
 }

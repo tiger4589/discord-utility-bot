@@ -281,4 +281,50 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
             _loggingService.LogConfigurationError -= LoggingServiceOnLogConfigurationError;
         }
     }
+
+    [Group("verify-message", "Add Verify Message To Send On Command")]
+    public class VerifyMessageModule : InteractionModuleBase<SocketInteractionContext>
+    {
+        private readonly IConfigurationService _configurationService;
+
+        public VerifyMessageModule(IConfigurationService configurationService)
+        {
+            _configurationService = configurationService;
+        }
+
+        [SlashCommand("add", "Add a verify message to send on command")]
+        public async Task AddVerifyMessageConfiguration([Summary(description:"Role to mention on message")]IRole role, [Summary(description: "Right click on the message, and copy id")] string messageId)
+        {
+            RemoveHandlers();
+            AddHandlers();
+
+            bool b = ulong.TryParse(messageId, out ulong realId);
+            if (!b)
+            {
+                await RespondAsync("Apparently, I can't convert this id... weird");
+                return;
+            }
+
+            var msg = await Context.Channel.GetMessageAsync(realId);
+
+            await RespondAsync("Adding Verify Message");
+            _ = _configurationService.AddVerifyMessageConfiguration(Context, role, msg.Content);
+        }
+
+        private void AddHandlers()
+        {
+            _configurationService.VerifyMessageConfigured += ConfigurationServiceOnVerifyMessageConfigured;
+        }
+
+        private async void ConfigurationServiceOnVerifyMessageConfigured(object? sender, ConfigurationServiceEventArgs e)
+        {
+            await e.InteractionContext.Interaction.ModifyOriginalResponseAsync(prop =>
+                prop.Content = e.Message);
+        }
+
+        private void RemoveHandlers()
+        {
+            _configurationService.VerifyMessageConfigured -= ConfigurationServiceOnVerifyMessageConfigured;
+        }
+    }
 }

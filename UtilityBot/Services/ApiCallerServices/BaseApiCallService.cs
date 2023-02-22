@@ -74,4 +74,38 @@ public abstract class BaseApiCallService
             throw;
         }
     }
+
+    protected async Task<T?> GetApiFromServiceUrl<T>(Dictionary<string, string>? headers = null) where T : class
+    {
+        try
+        {
+            using var httpClient = new HttpClient();
+
+
+            if (headers != null)
+            {
+                foreach (var header in headers)
+                {
+                    httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
+                }
+            }
+            
+            var response = await httpClient.GetAsync(ServiceUrl);
+
+            try
+            {
+                var result = await response.Content.ReadFromJsonAsync<T?>();
+                return result;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
 }

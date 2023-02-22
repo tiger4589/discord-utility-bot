@@ -19,6 +19,7 @@
     <Folder Include="Services\ApiCallerServices\" />
     <Folder Include="Services\MessageHandlers\" />
     <Folder Include="Services\ButtonHandlers\" />
+    <Folder Include="Services\JokesServices\" />
     <Folder Include="Services\PlayerServices\" />
     <Folder Include="Services\UserJoinedServices\" />
   </ItemGroup>

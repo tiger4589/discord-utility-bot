@@ -20,6 +20,10 @@ public class UtilityBotContext : DbContext
     public DbSet<VerifyConfigurationAudit>? VerifyConfigurationAudits { get; set; }
     public DbSet<LogConfiguration>? LogConfigurations { get; set; }
     public DbSet<LogConfigurationAudit>? LogConfigurationsAudit { get; set; }
+    public DbSet<VerifyMessageConfiguration>? VerifyMessageConfigurations { get; set; }
+    public DbSet<VerifyMessageConfigurationAudit>? VerifyMessageConfigurationAudits { get; set; }
+    public DbSet<JokeConfiguration>? JokeConfigurations { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserJoinConfiguration>().HasKey(x => new { x.GuildId, ActionType = x.Action });

@@ -1,5 +1,6 @@
 ﻿using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Identity.Client;
 using UtilityBot.Contracts;
 using UtilityBot.Domain.Services.ConfigurationService.Interfaces;
 using UtilityBot.Services.ApiCallerServices;
@@ -47,6 +48,14 @@ public class GuildJoinedManager : IGuildJoinedManager
 
             _cacheManager.InitializeCache(configuration, verifyConfiguration);
             await _userJoinedService.TriggerAfterRestart(configuration);
+
+            var verifyMessageConfiguration = await _configurationService.GetVerifyMessageConfiguration();
+            if (verifyMessageConfiguration != null)
+            {
+                _cacheManager.AddOrUpdate(verifyMessageConfiguration);
+            }
+
+            await LoggingServices.Logger.Log($"Should have initialized my cache!");
         }
         catch (Exception e)
         {

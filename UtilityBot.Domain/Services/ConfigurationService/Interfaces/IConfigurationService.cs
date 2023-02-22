@@ -23,4 +23,11 @@ public interface IConfigurationService
     Task AddLogConfiguration(ulong guildId, ulong channelId);
     Task<LogConfiguration?> GetLogConfiguration(ulong guildId);
     Task RemoveLogConfiguration();
+
+    Task AddOrUpdateVerifyMessageConfiguration(ulong guildId, ulong roleId, string message);
+    Task<VerifyMessageConfiguration?> GetVerifyMessageConfiguration();
+
+    Task AddOrUpdateJokeConfiguration(JokeConfiguration jokeConfiguration);
+    Task<IList<JokeConfiguration>> GetJokeConfigurations();
+
 }

@@ -3,6 +3,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using UtilityBot.Contracts;
 using UtilityBot.Services.CacheService;
+using UtilityBot.Services.LoggingServices;
 using UtilityBot.Services.MessageHandlers;
 
 namespace UtilityBot.Services.UserJoinedServices;
@@ -23,10 +24,10 @@ public class UserJoinedService : IUserJoinedService
         _client.Ready += InitializeService;
     }
 
-    public Task InitializeService()
+    public async Task InitializeService()
     {
         _client.UserJoined += ClientOnUserJoined;
-        return Task.CompletedTask;
+        await Logger.Log("Listening to UserJoined event from now on!");
     }
 
     private async Task ClientOnUserJoined(SocketGuildUser arg)
@@ -115,5 +116,7 @@ public class UserJoinedService : IUserJoinedService
                 }
             }
         }
+
+        await Logger.Log("Should have finished checking for missed users while offline");
     }
 }

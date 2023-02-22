@@ -3,6 +3,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
+using UtilityBot.Services.LoggingServices;
 
 namespace UtilityBot.Services.InteractionServiceManager;
 
@@ -35,6 +36,8 @@ public class InteractionServiceServices : IInteractionServiceServices
             var ctx = new SocketInteractionContext(_client, interaction);
             await _interactionService.ExecuteCommandAsync(ctx, _serviceProvider);
         };
+
+        await Logger.Log("Should have set up my slash commands and ready to listen!");
     }
 
     private async Task InteractionServiceOnSlashCommandExecuted(SlashCommandInfo arg1, IInteractionContext arg2, IResult arg3)
@@ -44,22 +47,25 @@ public class InteractionServiceServices : IInteractionServiceServices
             switch (arg3.Error)
             {
                 case InteractionCommandError.UnmetPrecondition:
-                    await arg2.Interaction.RespondAsync($"Unmet Precondition: {arg3.ErrorReason}");
+                    await Logger.Log($"{arg2.User.Username} tried to use {arg1.Name} command with unmet precondition!");
+                    await arg2.Interaction.RespondAsync("Not Allowed!", ephemeral: true);
                     break;
                 case InteractionCommandError.UnknownCommand:
-                    await arg2.Interaction.RespondAsync("Unknown command");
+                    await arg2.Interaction.RespondAsync("Unknown command", ephemeral: true);
                     break;
                 case InteractionCommandError.BadArgs:
-                    await arg2.Interaction.RespondAsync("Invalid number or arguments");
+                    await arg2.Interaction.RespondAsync("Invalid number or arguments", ephemeral: true);
                     break;
                 case InteractionCommandError.Exception:
-                    await arg2.Interaction.RespondAsync($"Command exception:{arg3.ErrorReason}");
+                    await Logger.Log($"{arg2.User.Username} tried to use {arg1.Name} and got an exception: {arg3.ErrorReason}");
+                    await arg2.Interaction.RespondAsync("Error occured, mods have been alerted!", ephemeral: true);
                     break;
                 case InteractionCommandError.Unsuccessful:
-                    await arg2.Interaction.RespondAsync("Command could not be executed");
+                    await arg2.Interaction.RespondAsync("Command could not be executed", ephemeral: true);
                     break;
                 default:
-                    await arg2.Interaction.RespondAsync($"Error: {arg3.Error}");
+                    await Logger.Log($"{arg2.User.Username} tried to use {arg1.Name} and got an error: {arg3.Error} - {arg3.ErrorReason}");
+                    await arg2.Interaction.RespondAsync("Error occured, mods have been alerted!", ephemeral: true);
                     break;
             }
         }

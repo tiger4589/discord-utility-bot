@@ -217,6 +217,55 @@ public class CacheManager : ICacheManager
         return (LogConfiguration?)_logConfiguration["log_conf"];
     }
 
+    private readonly Hashtable _verifyMessageConfiguration = new Hashtable();
+    public VerifyMessageConfiguration? GetVerifyMessageConfiguration()
+    {
+        return (VerifyMessageConfiguration?)_verifyMessageConfiguration["conf"];
+    }
+
+    public void AddOrUpdate(VerifyMessageConfiguration verifyMessageConfiguration)
+    {
+        _verifyMessageConfiguration.Clear();
+
+        _verifyMessageConfiguration.Add("conf", verifyMessageConfiguration);
+    }
+
+    private readonly Hashtable _jokesConfiguration = new Hashtable();
+
+    public void AddOrUpdate(JokeConfiguration jokeConfiguration)
+    {
+        var currentConfiguration = (JokeConfiguration?)_jokesConfiguration[jokeConfiguration.JokeType];
+        if (currentConfiguration == null)
+        {
+            _jokesConfiguration.Add(jokeConfiguration.JokeType, jokeConfiguration);
+            return;
+        }
+
+        currentConfiguration.ChannelId = jokeConfiguration.ChannelId;
+        currentConfiguration.IsEnabled = jokeConfiguration.IsEnabled;
+    }
+
+    public IList<JokeConfiguration> GetJokeConfigurations()
+    {
+        var result = new List<JokeConfiguration>();
+        foreach (DictionaryEntry entry in _jokesConfiguration)
+        {
+            if (entry.Value == null)
+            {
+                continue;
+            }
+
+            result.Add((JokeConfiguration)entry.Value);
+        }
+
+        return result;
+    }
+
+    public JokeConfiguration? GetJokeConfiguration(EJokeType jokeType)
+    {
+        return (JokeConfiguration?)_jokesConfiguration[jokeType];
+    }
+
     public Configuration? GetGuildOnJoinConfiguration(ulong guildId)
     {
         if (!_userJoinConfiguration.ContainsKey(guildId))

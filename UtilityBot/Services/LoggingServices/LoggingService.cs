@@ -25,7 +25,7 @@ public class LoggingService : ILoggingService
         _cacheManager = serviceProvider.GetRequiredService<ICacheManager>();
         _configurationService = serviceProvider.GetRequiredService<IConfigurationService>();
         _configuration = serviceProvider.GetRequiredService<IConfiguration>();
-        _client.Ready += InitializeService;
+        
     }
 
     public async Task InitializeService()
@@ -35,6 +35,19 @@ public class LoggingService : ILoggingService
         {
             _cacheManager.AddOrUpdate(logConfiguration);
         }
+       
+        _client.Ready += ClientOnReady;
+    }
+
+    private Task ClientOnReady()
+    {
+        _client.Log += LogAsync;
+        _client.MessageReceived += MessageReceived;
+        return Task.CompletedTask;
+    }
+
+    private void InitializedOtherLogs()
+    {
         _client.Log += LogAsync;
         _client.MessageReceived += MessageReceived;
     }

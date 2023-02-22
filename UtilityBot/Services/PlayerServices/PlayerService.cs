@@ -36,7 +36,14 @@ public class PlayerService : IPlayerService
 
         if (recruitLink.Split(' ').Length > 1 || !recruitLink.StartsWith("https://www.kingsofchaos.com/recruit.php?uniqid="))
         {
-            await context.Interaction.RespondAsync("Invalid Recruit Link! Please use yours from your command center", ephemeral: true);
+            await context.Interaction.RespondAsync("Invalid Recruit Link! Please use yours from your command center, if you think this is wrong, message a moderator", ephemeral: true);
+            return;
+        }
+
+        var uniqueHash = recruitLink.Replace("https://www.kingsofchaos.com/recruit.php?uniqid=", "");
+        if (uniqueHash.Length != 8)
+        {
+            await context.Interaction.RespondAsync("Invalid Recruit Link! Please use yours from your command center, if you think this is wrong, message a moderator", ephemeral: true);
             return;
         }
 

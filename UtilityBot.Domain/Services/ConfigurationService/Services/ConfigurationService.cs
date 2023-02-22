@@ -416,6 +416,75 @@ public class ConfigurationService : IConfigurationService
         await _context.SaveChangesAsync();
     }
 
+    public async Task AddOrUpdateVerifyMessageConfiguration(ulong guildId, ulong roleId, string message)
+    {
+        var verifyMessageConfiguration = await _context.VerifyMessageConfigurations!.SingleOrDefaultAsync();
+
+        if (verifyMessageConfiguration == null)
+        {
+            await _context.VerifyMessageConfigurations!.AddAsync(new VerifyMessageConfiguration
+            {
+                GuildId = guildId,
+                RoleId = roleId,
+                Message = message
+            });
+
+            await _context.VerifyMessageConfigurationAudits!.AddAsync(new VerifyMessageConfigurationAudit
+            {
+                GuildId = guildId,
+                RoleId = roleId,
+                Message = message,
+                CreationDate = DateTime.Now,
+                UpdateType = Insert
+            });
+        }
+        else
+        {
+            await _context.VerifyMessageConfigurationAudits!.AddAsync(new VerifyMessageConfigurationAudit
+            {
+                CreationDate = DateTime.Now,
+                GuildId = verifyMessageConfiguration.GuildId,
+                Message = verifyMessageConfiguration.Message,
+                RoleId = verifyMessageConfiguration.RoleId,
+                UpdateType = Update
+            });
+
+            verifyMessageConfiguration.GuildId = guildId;
+            verifyMessageConfiguration.RoleId = roleId;
+            verifyMessageConfiguration.Message = message;
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<VerifyMessageConfiguration?> GetVerifyMessageConfiguration()
+    {
+        return await _context.VerifyMessageConfigurations!.AsNoTracking().SingleOrDefaultAsync();
+    }
+
+    public async Task AddOrUpdateJokeConfiguration(JokeConfiguration jokeConfiguration)
+    {
+        var conf = await _context.JokeConfigurations!.SingleOrDefaultAsync(
+            x => x.JokeType == jokeConfiguration.JokeType);
+
+        if (conf == null)
+        {
+            await _context.JokeConfigurations!.AddAsync(jokeConfiguration);
+        }
+        else
+        {
+            conf.ChannelId = jokeConfiguration.ChannelId;
+            conf.IsEnabled = jokeConfiguration.IsEnabled;
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<IList<JokeConfiguration>> GetJokeConfigurations()
+    {
+        return await _context.JokeConfigurations!.AsNoTracking().ToListAsync();
+    }
+
     private async Task UpdateExistingServer(JoinedServer joinedServer, ConnectedServer connectedServer, bool isSave = false)
     {
         joinedServer.IsConnected = true;
