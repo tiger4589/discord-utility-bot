@@ -27,4 +27,11 @@ public class GeneralModule : InteractionModuleBase<SocketInteractionContext>
         await RespondAsync("Getting a random dad joke for ya!", ephemeral: true);
         _ = _jokeService.GetRandomDadJoke(Context);
     }
+
+    [SlashCommand("chucknorris", "Get a random Chuck Norris Fact")]
+    public async Task GetChuckNorrisFact()
+    {
+        await RespondAsync("Getting a random fact!", ephemeral: true);
+        _ = _jokeService.GetRandomChuckNorrisJoke(Context);
+    }
 }

@@ -14,5 +14,6 @@ public class JokeConfiguration
 
 public enum EJokeType
 {
-    DadJoke
+    DadJoke,
+    ChuckNorrisJoke
 }
