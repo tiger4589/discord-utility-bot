@@ -23,6 +23,7 @@ public class UtilityBotContext : DbContext
     public DbSet<VerifyMessageConfiguration>? VerifyMessageConfigurations { get; set; }
     public DbSet<VerifyMessageConfigurationAudit>? VerifyMessageConfigurationAudits { get; set; }
     public DbSet<JokeConfiguration>? JokeConfigurations { get; set; }
+    public DbSet<UserNote>? UserNotes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

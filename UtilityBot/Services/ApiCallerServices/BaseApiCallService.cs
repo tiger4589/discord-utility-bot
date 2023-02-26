@@ -3,7 +3,6 @@ using System.Net.Http.Json;
 
 namespace UtilityBot.Services.ApiCallerServices;
 
-//keep it now to probably use it later for other stuff requiring external apis
 public abstract class BaseApiCallService
 {
     private readonly string _apiBaseUrl;
@@ -14,7 +13,7 @@ public abstract class BaseApiCallService
     {
         _apiBaseUrl = configuration["ApiBaseUrl"] ?? throw new InvalidOperationException("Can't find Api Base URL!");
     }
-    //todo: improve exceptions and probably add logging
+
     protected async Task CallApi(object data)
     {
         try
@@ -80,7 +79,6 @@ public abstract class BaseApiCallService
         try
         {
             using var httpClient = new HttpClient();
-
 
             if (headers != null)
             {

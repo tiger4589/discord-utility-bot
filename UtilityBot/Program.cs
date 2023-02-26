@@ -7,6 +7,7 @@ using Serilog;
 using UtilityBot.Client;
 using UtilityBot.Domain.Database;
 using UtilityBot.Domain.Mappers;
+using UtilityBot.Domain.Services.UserNoteServices;
 using UtilityBot.Services.ButtonHandlers;
 using UtilityBot.Services.CacheService;
 using UtilityBot.Services.ConfigurationServices;
@@ -16,6 +17,7 @@ using UtilityBot.Services.InteractionServiceManager;
 using UtilityBot.Services.JokesServices;
 using UtilityBot.Services.LoggingServices;
 using UtilityBot.Services.MessageHandlers;
+using UtilityBot.Services.NoteServices;
 using UtilityBot.Services.PlayerServices;
 using UtilityBot.Services.UserJoinedServices;
 
@@ -67,6 +69,8 @@ IServiceProvider BuildServiceProvider() => new ServiceCollection()
     .AddAutoMapper(typeof(ServerMappingProfile))
     .AddTransient<ILogger>(_ => new LoggerConfiguration().MinimumLevel.Warning().WriteTo.File("logs\\log-.txt", rollingInterval: RollingInterval.Hour,
         shared: true, retainedFileCountLimit: 72).CreateLogger())
+    .AddSingleton<IUserNoteService, UserNoteService>()
+    .AddSingleton<INoteService, NoteService>()
     .BuildServiceProvider();
 
 void InitializeMainComponents()

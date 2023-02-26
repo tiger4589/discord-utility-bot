@@ -5,7 +5,7 @@ using UtilityBot.Services.CacheService;
 
 namespace UtilityBot.Modules;
 
-[RequireUserPermission(GuildPermission.ManageRoles)]
+[DefaultMemberPermissions(GuildPermission.ManageRoles)]
 public class ModeratorModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly ICacheManager _cacheManager;

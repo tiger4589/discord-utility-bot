@@ -6,7 +6,7 @@ using UtilityBot.EventArguments;
 namespace UtilityBot.Modules;
 
 [Group("chuck-norris", "Chuck Norris Facts Configuration Module")]
-[RequireUserPermission(GuildPermission.ManageGuild, Group = "chuck-norris")]
+[DefaultMemberPermissions(GuildPermission.ManageGuild)]
 public class ChuckNorrisConfigurationModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly IJokeService _jokeService;

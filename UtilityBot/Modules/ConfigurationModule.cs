@@ -7,7 +7,7 @@ using UtilityBot.Services.LoggingServices;
 namespace UtilityBot.Modules;
 
 [Group("configuration", "Guild Configuration Module")]
-[RequireUserPermission(GuildPermission.ManageGuild, Group = "Configuration")]
+[DefaultMemberPermissions(GuildPermission.ManageGuild)]
 public class ConfigurationModule : InteractionModuleBase<SocketInteractionContext>
 {
     [Group("on-join-role", "Add A Specific Role For User On Join")]

@@ -6,7 +6,7 @@ using UtilityBot.Services.JokesServices;
 namespace UtilityBot.Modules;
 
 [Group("dad-jokes", "Dad Jokes Configuration Module")]
-[RequireUserPermission(GuildPermission.ManageGuild, Group = "dad-jokes")]
+[DefaultMemberPermissions(GuildPermission.ManageGuild)]
 public class DadJokeConfigurationModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly IJokeService _jokeService;
