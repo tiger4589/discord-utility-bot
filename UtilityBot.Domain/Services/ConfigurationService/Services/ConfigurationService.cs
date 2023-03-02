@@ -485,6 +485,18 @@ public class ConfigurationService : IConfigurationService
         return await _context.JokeConfigurations!.AsNoTracking().ToListAsync();
     }
 
+    public async Task AddConfiguration(CapsProtectionConfiguration configuration)
+    {
+        await _context.CapsProtectionConfigurations!.AddAsync(configuration);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<CapsProtectionConfiguration?> GetLatestCapsProtectionConfiguration()
+    {
+        return await _context.CapsProtectionConfigurations!.AsNoTracking().OrderByDescending(x => x.Id)
+            .FirstOrDefaultAsync();
+    }
+
     private async Task UpdateExistingServer(JoinedServer joinedServer, ConnectedServer connectedServer, bool isSave = false)
     {
         joinedServer.IsConnected = true;

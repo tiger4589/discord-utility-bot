@@ -24,10 +24,21 @@ public class UtilityBotContext : DbContext
     public DbSet<VerifyMessageConfigurationAudit>? VerifyMessageConfigurationAudits { get; set; }
     public DbSet<JokeConfiguration>? JokeConfigurations { get; set; }
     public DbSet<UserNote>? UserNotes { get; set; }
+    public DbSet<RumbleConfiguration>? RumbleConfigurations { get; set; }
+    public DbSet<RumbleMessageConfiguration>? RumbleMessageConfigurations { get; set; }
+    public DbSet<CapsProtectionConfiguration>? CapsProtectionConfigurations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserJoinConfiguration>().HasKey(x => new { x.GuildId, ActionType = x.Action });
         modelBuilder.Entity<UserJoinRole>().HasKey(x => new { x.GuildId, x.RoleId });
+        modelBuilder.Entity<RumbleMessageConfiguration>().HasData(new List<RumbleMessageConfiguration>
+        {
+            new RumbleMessageConfiguration
+            {
+                Id = 1,
+                Message = "A new battle has started!"
+            }
+        });
     }
 }

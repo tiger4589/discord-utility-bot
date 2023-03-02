@@ -22,4 +22,5 @@ public interface IConfigurationService
     public event EventHandler<ConfigurationServiceEventArgs> MessageRemoved;
     public event EventHandler<ConfigurationServiceEventArgs> ErrorOnPublicMessage;
     public event EventHandler<ConfigurationServiceEventArgs> VerifyConfigurationSet;
+    Task AddCapsProtection(SocketInteractionContext context, int minimumLength, int percentage);
 }

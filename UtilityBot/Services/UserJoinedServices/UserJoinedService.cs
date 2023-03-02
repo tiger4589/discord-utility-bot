@@ -95,28 +95,35 @@ public class UserJoinedService : IUserJoinedService
 
     public async Task TriggerAfterRestart(Configuration configuration)
     {
-        var guild = _client.GetGuild(ulong.Parse(_configuration["ServerId"]!));
-        var users = guild.Users;
-
-        foreach (var user in users)
+        try
         {
-            if ((user.Roles.Count == 1 && user.Roles.Single().IsEveryone) || user.Roles.Count == 0)
-            {
-                foreach (var userJoinConfiguration in configuration.UserJoinConfigurations)
-                {
-                    if (userJoinConfiguration.Action == ActionTypeNames.AddRole)
-                    {
-                        await AddRolesOnJoin(user, configuration.UserJoinRoles);
-                    }
+            var guild = _client.GetGuild(ulong.Parse(_configuration["ServerId"]!));
+            var users = guild.Users;
 
-                    if (userJoinConfiguration.Action == ActionTypeNames.SendMessage)
+            foreach (var user in users)
+            {
+                if ((user.Roles.Count == 1 && user.Roles.Single().IsEveryone) || user.Roles.Count == 0)
+                {
+                    foreach (var userJoinConfiguration in configuration.UserJoinConfigurations)
                     {
-                        await SendMessageOnJoin(user, configuration.UserJoinMessages, true);
+                        if (userJoinConfiguration.Action == ActionTypeNames.AddRole)
+                        {
+                            await AddRolesOnJoin(user, configuration.UserJoinRoles);
+                        }
+
+                        if (userJoinConfiguration.Action == ActionTypeNames.SendMessage)
+                        {
+                            await SendMessageOnJoin(user, configuration.UserJoinMessages, true);
+                        }
                     }
                 }
             }
-        }
 
-        await Logger.Log("Should have finished checking for missed users while offline");
+            await Logger.Log("Should have finished checking for missed users while offline");
+        }
+        catch (Exception e)
+        {
+            await Logger.Log($"Errorrrrr!!! {e}");
+        }
     }
 }

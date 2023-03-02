@@ -4,6 +4,7 @@ using UtilityBot.Contracts;
 using UtilityBot.Domain.DomainObjects;
 using UtilityBot.EventArguments;
 using UtilityBot.Services.CacheService;
+using UtilityBot.Services.SpamProtectionServices;
 using UserJoinConfiguration = UtilityBot.Contracts.UserJoinConfiguration;
 using UserJoinMessage = UtilityBot.Contracts.UserJoinMessage;
 using UserJoinRole = UtilityBot.Contracts.UserJoinRole;
@@ -15,11 +16,13 @@ public class ConfigurationService : IConfigurationService
 {
     private readonly ICacheManager _cacheManager;
     private readonly Domain.Services.ConfigurationService.Interfaces.IConfigurationService _configurationService;
+    private readonly ISpamProtectionService _spamProtectionService;
 
-    public ConfigurationService(ICacheManager cacheManager, Domain.Services.ConfigurationService.Interfaces.IConfigurationService configurationService)
+    public ConfigurationService(ICacheManager cacheManager, Domain.Services.ConfigurationService.Interfaces.IConfigurationService configurationService, ISpamProtectionService spamProtectionService)
     {
         _cacheManager = cacheManager;
         _configurationService = configurationService;
+        _spamProtectionService = spamProtectionService;
     }
 
     public async Task AddRoleToGuildOnJoin(SocketInteractionContext interactionContext, ulong guildId, ulong roleId)
@@ -201,6 +204,23 @@ public class ConfigurationService : IConfigurationService
     public event EventHandler<ConfigurationServiceEventArgs>? MessageConfigured;
     public event EventHandler<ConfigurationServiceEventArgs>? ErrorOnPublicMessage;
     public event EventHandler<ConfigurationServiceEventArgs>? VerifyConfigurationSet;
+    public async Task AddCapsProtection(SocketInteractionContext context, int minimumLength, int percentage)
+    {
+        var capsProtectionConfiguration = new CapsProtectionConfiguration
+        {
+            MinimumLength = minimumLength,
+            MinimumPercentage = percentage
+        };
+
+        await _configurationService.AddConfiguration(capsProtectionConfiguration);
+        _cacheManager.AddOrUpdate(capsProtectionConfiguration);
+
+        await context.Interaction.ModifyOriginalResponseAsync(prop =>
+            prop.Content = $"Will delete and warn users with a message of minimum {minimumLength} characters of which at least {percentage}% are caps!");
+
+        await _spamProtectionService.ForceInitialize();
+    }
+
     public event EventHandler<ConfigurationServiceEventArgs>? ErrorOnRole;
     public event EventHandler<ConfigurationServiceEventArgs>? MessageRemoved;
     public event EventHandler<ConfigurationServiceEventArgs>? VerifyMessageConfigured;

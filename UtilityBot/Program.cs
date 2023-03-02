@@ -7,10 +7,11 @@ using Serilog;
 using UtilityBot.Client;
 using UtilityBot.Domain.Database;
 using UtilityBot.Domain.Mappers;
+using UtilityBot.Domain.Services.ConfigurationService.Interfaces;
+using UtilityBot.Domain.Services.ConfigurationService.Services;
 using UtilityBot.Domain.Services.UserNoteServices;
 using UtilityBot.Services.ButtonHandlers;
 using UtilityBot.Services.CacheService;
-using UtilityBot.Services.ConfigurationServices;
 using UtilityBot.Services.GuildJoinedServices.Interfaces;
 using UtilityBot.Services.GuildJoinedServices.Managers;
 using UtilityBot.Services.InteractionServiceManager;
@@ -19,7 +20,11 @@ using UtilityBot.Services.LoggingServices;
 using UtilityBot.Services.MessageHandlers;
 using UtilityBot.Services.NoteServices;
 using UtilityBot.Services.PlayerServices;
+using UtilityBot.Services.RumbleServices;
+using UtilityBot.Services.SpamProtectionServices;
 using UtilityBot.Services.UserJoinedServices;
+using ConfigurationService = UtilityBot.Services.ConfigurationServices.ConfigurationService;
+using IConfigurationService = UtilityBot.Services.ConfigurationServices.IConfigurationService;
 
 var serviceProvider = BuildServiceProvider();
 
@@ -71,6 +76,9 @@ IServiceProvider BuildServiceProvider() => new ServiceCollection()
         shared: true, retainedFileCountLimit: 72).CreateLogger())
     .AddSingleton<IUserNoteService, UserNoteService>()
     .AddSingleton<INoteService, NoteService>()
+    .AddSingleton<IRumbleConfigurationService, RumbleConfigurationService>()
+    .AddSingleton<IRumbleService, RumbleService>()
+    .AddSingleton<ISpamProtectionService, SpamProtectionService>()
     .BuildServiceProvider();
 
 void InitializeMainComponents()
@@ -85,5 +93,7 @@ void InitializeMainComponents()
     serviceProvider.GetRequiredService<IUserJoinedService>();
     serviceProvider.GetRequiredService<IButtonHandler>();
     serviceProvider.GetRequiredService<IJokeService>();
+    serviceProvider.GetRequiredService<IRumbleService>();
+    serviceProvider.GetRequiredService<ISpamProtectionService>();
 }
 

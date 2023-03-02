@@ -266,6 +266,59 @@ public class CacheManager : ICacheManager
         return (JokeConfiguration?)_jokesConfiguration[jokeType];
     }
 
+    private readonly Hashtable _rumbleConfiguration = new Hashtable();
+
+    public void AddOrUpdate(RumbleConfiguration configuration)
+    {
+        if (_rumbleConfiguration.ContainsKey("conf"))
+        {
+            _rumbleConfiguration.Remove("conf");
+        }
+
+        _rumbleConfiguration.Add("conf", configuration);
+    }
+
+    public RumbleConfiguration? GetRumbleConfiguration()
+    {
+        return (RumbleConfiguration?)_rumbleConfiguration["conf"];
+    }
+
+    public void Add(RumbleMessageConfiguration configuration)
+    {
+        List<RumbleMessageConfiguration> messages;
+        if (_rumbleConfiguration.ContainsKey("msg_conf"))
+        {
+            messages = (List<RumbleMessageConfiguration>)_rumbleConfiguration["msg_conf"]!;
+            messages.Add(configuration);
+        }
+        else
+        {
+            messages = new List<RumbleMessageConfiguration> { configuration };
+            _rumbleConfiguration["msg_conf"] = messages;
+        }
+    }
+
+    public IList<RumbleMessageConfiguration> GetRumbleMessageConfigurations()
+    {
+        return (List<RumbleMessageConfiguration>)_rumbleConfiguration["msg_conf"]!;
+    }
+
+    private readonly Hashtable _capsConfiguration = new Hashtable();
+    public void AddOrUpdate(CapsProtectionConfiguration configuration)
+    {
+        if (_capsConfiguration.ContainsKey("conf"))
+        {
+            _capsConfiguration.Remove("conf");
+        }
+
+        _capsConfiguration.Add("conf", configuration);
+    }
+
+    public CapsProtectionConfiguration? GetCapsProtectionConfiguration()
+    {
+        return (CapsProtectionConfiguration?)_capsConfiguration["conf"];
+    }
+
     public Configuration? GetGuildOnJoinConfiguration(ulong guildId)
     {
         if (!_userJoinConfiguration.ContainsKey(guildId))

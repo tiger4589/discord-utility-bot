@@ -3,6 +3,7 @@ using Discord.Interactions;
 using UtilityBot.EventArguments;
 using UtilityBot.Services.ConfigurationServices;
 using UtilityBot.Services.LoggingServices;
+using UtilityBot.Services.RumbleServices;
 
 namespace UtilityBot.Modules;
 
@@ -325,6 +326,54 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
         private void RemoveHandlers()
         {
             _configurationService.VerifyMessageConfigured -= ConfigurationServiceOnVerifyMessageConfigured;
+        }
+    }
+
+    [Group("rumble-conf", "Configure Royal Rumble Stuff!")]
+    public class RumbleConfigurationModule : InteractionModuleBase<SocketInteractionContext>
+    {
+        private readonly IRumbleService _rumbleService;
+
+        public RumbleConfigurationModule(IRumbleService rumbleService)
+        {
+            _rumbleService = rumbleService;
+        }
+
+        [SlashCommand("add-message", "Add a message to be sent when a battle starts! (The more the merrier)")]
+        public async Task AddRumbleMessage(string message)
+        {
+            await RespondAsync("Adding message!");
+            _ = _rumbleService.AddMessageConfiguration(Context, message);
+        }
+
+        [SlashCommand("add-update-configuration", "Set up the bot to watch battles!")]
+        public async Task SetUp(
+            [Summary(description:"Channel to watch in")]ITextChannel channel,
+            [Summary(description:"Bot Role")]IRole botRole,
+            [Summary(description:"Emoji To Watch for")]string emoji,
+            [Summary(description:"Role to ping")]IRole roleToPing,
+            [Summary(description:"Should the bot join the game?")]bool isJoinGame = false)
+        {
+            await RespondAsync("Configuring");
+            _ = _rumbleService.AddConfiguration(Context, channel, botRole, emoji, roleToPing, isJoinGame);
+        }
+    }
+
+    [Group("caps-protection", "Configure Caps Protection!")]
+    public class CapsProtectionConfigurationModule : InteractionModuleBase<SocketInteractionContext>
+    {
+        private readonly IConfigurationService _configurationService;
+
+        public CapsProtectionConfigurationModule(IConfigurationService configurationService)
+        {
+            _configurationService = configurationService;
+        }
+
+        [SlashCommand("add", "Add caps protection settings")]
+        public async Task AddRumbleMessage(int minimumLength, int percentage)
+        {
+            await RespondAsync("Adding configuration!");
+            _ = _configurationService.AddCapsProtection(Context, minimumLength, percentage);
         }
     }
 }

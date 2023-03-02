@@ -1,16 +1,19 @@
 ﻿using Discord;
 using Discord.Interactions;
 using UtilityBot.Services.JokesServices;
+using UtilityBot.Services.RumbleServices;
 
 namespace UtilityBot.Modules;
 
 public class GeneralModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly IJokeService _jokeService;
+    private readonly IRumbleService _rumbleService;
 
-    public GeneralModule(IJokeService jokeService)
+    public GeneralModule(IJokeService jokeService, IRumbleService rumbleService)
     {
         _jokeService = jokeService;
+        _rumbleService = rumbleService;
     }
 
     [SlashCommand("slap", "Slap a user mIRC style!")]
@@ -33,5 +36,19 @@ public class GeneralModule : InteractionModuleBase<SocketInteractionContext>
     {
         await RespondAsync("Getting a random fact!", ephemeral: true);
         _ = _jokeService.GetRandomChuckNorrisJoke(Context);
+    }
+
+    [SlashCommand("subscribe-to-rumble", "Get notified when a royal rumble starts")]
+    public async Task SubscribeToRumble()
+    {
+        await RespondAsync("Subscribing...", ephemeral: true);
+        _ = _rumbleService.Subscribe(Context);
+    }
+
+    [SlashCommand("unsubscribe-from-rumble", "Stop getting notified when a royal rumble starts")]
+    public async Task UnsubscribeToRumble()
+    {
+        await RespondAsync("Unsubscribing... :(", ephemeral: true);
+        _ = _rumbleService.Unsubscribe(Context);
     }
 }

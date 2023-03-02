@@ -30,4 +30,7 @@ public interface IConfigurationService
     Task AddOrUpdateJokeConfiguration(JokeConfiguration jokeConfiguration);
     Task<IList<JokeConfiguration>> GetJokeConfigurations();
 
+
+    Task AddConfiguration(CapsProtectionConfiguration configuration);
+    Task<CapsProtectionConfiguration?> GetLatestCapsProtectionConfiguration();
 }

@@ -25,4 +25,12 @@ public interface ICacheManager
     void AddOrUpdate(JokeConfiguration jokeConfiguration);
     IList<JokeConfiguration> GetJokeConfigurations();
     JokeConfiguration? GetJokeConfiguration(EJokeType jokeType);
+
+    void AddOrUpdate(RumbleConfiguration configuration);
+    RumbleConfiguration? GetRumbleConfiguration();
+    void Add(RumbleMessageConfiguration configuration);
+    IList<RumbleMessageConfiguration> GetRumbleMessageConfigurations();
+
+    void AddOrUpdate(CapsProtectionConfiguration configuration);
+    CapsProtectionConfiguration? GetCapsProtectionConfiguration();
 }
