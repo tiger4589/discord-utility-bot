@@ -23,12 +23,14 @@ public class GuildJoinedManager : IGuildJoinedManager
         _client = client;
         _configurationService = configurationService;
         _userJoinedService = userJoinedService;
+        _client.Ready -= ClientOnReady;
         _client.Ready += ClientOnReady;
     }
 
     private async Task ClientOnReady()
     {
         await GetConfigurationOnRun(_client.Guilds);
+        _client.JoinedGuild -= ClientOnJoinedGuild;
         _client.JoinedGuild += ClientOnJoinedGuild;
     }
 

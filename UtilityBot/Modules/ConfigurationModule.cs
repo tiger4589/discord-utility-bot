@@ -3,6 +3,7 @@ using Discord.Interactions;
 using UtilityBot.EventArguments;
 using UtilityBot.Services.ConfigurationServices;
 using UtilityBot.Services.LoggingServices;
+using UtilityBot.Services.MagicEightBall;
 using UtilityBot.Services.RumbleServices;
 
 namespace UtilityBot.Modules;
@@ -374,6 +375,45 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
         {
             await RespondAsync("Adding configuration!");
             _ = _configurationService.AddCapsProtection(Context, minimumLength, percentage);
+        }
+    }
+
+    [Group("magic-8-ball", "Configure magic eight ball")]
+    public class MagicEightBallConfigurationModule : InteractionModuleBase<SocketInteractionContext>
+    {
+        private readonly IMagicEightBall _magicEightBall;
+
+        public MagicEightBallConfigurationModule(IMagicEightBall magicEightBall)
+        {
+            _magicEightBall = magicEightBall;
+        }
+
+        [SlashCommand("configure", "Configure magic eight ball")]
+        public async Task Configure(ITextChannel channel)
+        {
+            await RespondAsync("Configuring...");
+            _ = _magicEightBall.AddConfiguration(Context, channel);
+        }
+
+        [SlashCommand("add-response", "Add a magic eight ball response")]
+        public async Task Configure(string response)
+        {
+            await RespondAsync("Configuring...");
+            _ = _magicEightBall.AddResponse(Context, response);
+        }
+
+        [SlashCommand("enable", "Enable magic eight ball response")]
+        public async Task Enable()
+        {
+            await RespondAsync("Enabling...");
+            _ = _magicEightBall.Enable(Context);
+        }
+
+        [SlashCommand("disable", "Disable magic eight ball response")]
+        public async Task Disable()
+        {
+            await RespondAsync("Disabling...");
+            _ = _magicEightBall.Disable(Context);
         }
     }
 }

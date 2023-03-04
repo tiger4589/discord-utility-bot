@@ -27,7 +27,8 @@ public class UtilityBotContext : DbContext
     public DbSet<RumbleConfiguration>? RumbleConfigurations { get; set; }
     public DbSet<RumbleMessageConfiguration>? RumbleMessageConfigurations { get; set; }
     public DbSet<CapsProtectionConfiguration>? CapsProtectionConfigurations { get; set; }
-
+    public DbSet<MagicEightBallConfiguration>? MagicEightBallConfigurations { get; set; }
+    public DbSet<MagicEightBallResponse>? MagicEightBallResponses { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserJoinConfiguration>().HasKey(x => new { x.GuildId, ActionType = x.Action });
@@ -38,6 +39,110 @@ public class UtilityBotContext : DbContext
             {
                 Id = 1,
                 Message = "A new battle has started!"
+            }
+        });
+
+        modelBuilder.Entity<MagicEightBallResponse>().HasData(new List<MagicEightBallResponse>
+        {
+            new MagicEightBallResponse
+            {
+                Id = 1,
+                Message = "It is certain."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 2,
+                Message = "It is decidedly so."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 3,
+                Message = "Without a doubt."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 4,
+                Message = "Yes definitely."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 5,
+                Message = "You may rely on it."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 6,
+                Message = "As I see it, yes."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 7,
+                Message = "Most likely."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 8,
+                Message = "Outlook good."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 9,
+                Message = "Yes."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 10,
+                Message = "Signs point to yes."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 11,
+                Message = "Reply hazy, try again."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 12,
+                Message = "Ask again later."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 13,
+                Message = "Better not tell you now."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 14,
+                Message = "Cannot predict now."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 15,
+                Message = "Concentrate and ask again."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 16,
+                Message = "Don't count on it."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 17,
+                Message = "My reply is no."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 18,
+                Message = "My sources say no."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 19,
+                Message = "Outlook not so good."
+            },
+            new MagicEightBallResponse
+            {
+                Id = 20,
+                Message = "Very doubtful."
             }
         });
     }

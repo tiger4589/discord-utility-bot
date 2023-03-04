@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Microsoft.Extensions.Configuration;
+using System.Collections;
 using UtilityBot.Contracts;
 using UtilityBot.Domain.DomainObjects;
 using UtilityBot.Services.LoggingServices;
@@ -317,6 +318,60 @@ public class CacheManager : ICacheManager
     public CapsProtectionConfiguration? GetCapsProtectionConfiguration()
     {
         return (CapsProtectionConfiguration?)_capsConfiguration["conf"];
+    }
+
+    private readonly Hashtable _8BallConfiguration = new Hashtable();
+    public void AddOrUpdate(MagicEightBallConfiguration configuration)
+    {
+        if (_8BallConfiguration.ContainsKey("conf"))
+        {
+            _8BallConfiguration.Remove("conf");
+        }
+
+        _8BallConfiguration.Add("conf", configuration);
+    }
+
+    public MagicEightBallConfiguration? GetMagicEightBallConfiguration()
+    {
+        return (MagicEightBallConfiguration?)_8BallConfiguration["conf"];
+    }
+
+    public void Add(MagicEightBallResponse response)
+    {
+        List<MagicEightBallResponse> responses;
+        if (_8BallConfiguration.ContainsKey("msg_conf"))
+        {
+            responses = (List<MagicEightBallResponse>)_8BallConfiguration["msg_conf"]!;
+            responses.Add(response);
+        }
+        else
+        {
+            responses = new List<MagicEightBallResponse> { response };
+            _8BallConfiguration["msg_conf"] = responses;
+        }
+    }
+
+    public IList<MagicEightBallResponse> GetMagicEightBallResponses()
+    {
+        return (List<MagicEightBallResponse>)_8BallConfiguration["msg_conf"]!;
+    }
+
+    public void EnableMagicEightBall()
+    {
+        if (_8BallConfiguration.ContainsKey("conf"))
+        {
+            MagicEightBallConfiguration conf = (MagicEightBallConfiguration)_8BallConfiguration["conf"]!;
+            conf.IsEnabled = true;
+        }
+    }
+
+    public void DisableMagicEightBall()
+    {
+        if (_8BallConfiguration.ContainsKey("conf"))
+        {
+            MagicEightBallConfiguration conf = (MagicEightBallConfiguration)_8BallConfiguration["conf"]!;
+            conf.IsEnabled = false;
+        }
     }
 
     public Configuration? GetGuildOnJoinConfiguration(ulong guildId)

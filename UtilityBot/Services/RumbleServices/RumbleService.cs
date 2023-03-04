@@ -23,6 +23,7 @@ public class RumbleService : IRumbleService
         _cacheManager = cacheManager;
         _rumbleConfigurationService = rumbleConfigurationService;
         _configuration = configuration;
+        _client.Ready -= ClientOnReady;
         _client.Ready += ClientOnReady;
     }
 
@@ -47,6 +48,7 @@ public class RumbleService : IRumbleService
 
         await Logger.Log($"Loaded Rumble Messages");
 
+        _client.ReactionAdded -= ClientOnReactionAdded;
         _client.ReactionAdded += ClientOnReactionAdded;
         await Logger.Log($"Looking for battles, if I am configured!");
     }

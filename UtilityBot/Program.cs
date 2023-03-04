@@ -17,6 +17,7 @@ using UtilityBot.Services.GuildJoinedServices.Managers;
 using UtilityBot.Services.InteractionServiceManager;
 using UtilityBot.Services.JokesServices;
 using UtilityBot.Services.LoggingServices;
+using UtilityBot.Services.MagicEightBall;
 using UtilityBot.Services.MessageHandlers;
 using UtilityBot.Services.NoteServices;
 using UtilityBot.Services.PlayerServices;
@@ -79,6 +80,8 @@ IServiceProvider BuildServiceProvider() => new ServiceCollection()
     .AddSingleton<IRumbleConfigurationService, RumbleConfigurationService>()
     .AddSingleton<IRumbleService, RumbleService>()
     .AddSingleton<ISpamProtectionService, SpamProtectionService>()
+    .AddSingleton<IMagicEightBallService, MagicEightBallService>()
+    .AddSingleton<IMagicEightBall, MagicEightBall>()
     .BuildServiceProvider();
 
 void InitializeMainComponents()
@@ -95,5 +98,6 @@ void InitializeMainComponents()
     serviceProvider.GetRequiredService<IJokeService>();
     serviceProvider.GetRequiredService<IRumbleService>();
     serviceProvider.GetRequiredService<ISpamProtectionService>();
+    serviceProvider.GetRequiredService<IMagicEightBall>();
 }
 

@@ -29,6 +29,7 @@ public class JokeService : BaseApiCallService, IJokeService
         _configurationService = configurationService;
         _configuration = configuration;
         _embedMessageBuilder = embedMessageBuilder;
+        _client.Ready -= ClientOnReady;
         _client.Ready += ClientOnReady;
     }
 

@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using UtilityBot.Services.LoggingServices;
+using Microsoft.VisualBasic;
 
 namespace UtilityBot.Services.InteractionServiceManager;
 
@@ -19,6 +20,7 @@ public class InteractionServiceServices : IInteractionServiceServices
         _serviceProvider = serviceProvider;
         _client = client;
         _configuration = configuration;
+        _client.Ready -= InitializeService;
         _client.Ready += InitializeService;
     }
 
@@ -31,13 +33,22 @@ public class InteractionServiceServices : IInteractionServiceServices
 
         _interactionService.SlashCommandExecuted += InteractionServiceOnSlashCommandExecuted;
 
-        _client.InteractionCreated += async interaction =>
-        {
-            var ctx = new SocketInteractionContext(_client, interaction);
-            await _interactionService.ExecuteCommandAsync(ctx, _serviceProvider);
-        };
+        _client.InteractionCreated -= ClientOnInteractionCreated;
+        _client.InteractionCreated += ClientOnInteractionCreated;
 
         await Logger.Log("Should have set up my slash commands and ready to listen!");
+    }
+
+    private async Task ClientOnInteractionCreated(SocketInteraction arg)
+    {
+        var ctx = new SocketInteractionContext(_client, arg);
+
+        if (_interactionService == null)
+        {
+            return;
+        }
+
+        await _interactionService.ExecuteCommandAsync(ctx, _serviceProvider);
     }
 
     private async Task InteractionServiceOnSlashCommandExecuted(SlashCommandInfo arg1, IInteractionContext arg2, IResult arg3)

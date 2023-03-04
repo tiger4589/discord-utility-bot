@@ -7,7 +7,6 @@ using UtilityBot.Domain.DomainObjects;
 using UtilityBot.Domain.Services.ConfigurationService.Interfaces;
 using UtilityBot.EventArguments;
 using UtilityBot.Services.CacheService;
-using System.Threading.Channels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace UtilityBot.Services.LoggingServices;
@@ -36,20 +35,17 @@ public class LoggingService : ILoggingService
             _cacheManager.AddOrUpdate(logConfiguration);
         }
        
+        _client.Ready -= ClientOnReady;
         _client.Ready += ClientOnReady;
     }
 
     private Task ClientOnReady()
     {
+        _client.Log -= LogAsync;
         _client.Log += LogAsync;
+        _client.MessageReceived -= MessageReceived;
         _client.MessageReceived += MessageReceived;
         return Task.CompletedTask;
-    }
-
-    private void InitializedOtherLogs()
-    {
-        _client.Log += LogAsync;
-        _client.MessageReceived += MessageReceived;
     }
 
     private Task LogAsync(LogMessage message)
@@ -68,7 +64,7 @@ public class LoggingService : ILoggingService
 
     private Task MessageReceived(SocketMessage arg)
     {
-        if (arg.Author.Username == _client?.CurrentUser.Username)
+        if (arg.Author.Username == _client.CurrentUser.Username)
             return Task.CompletedTask;
 
         SocketGuildChannel? guildChannel = arg.Channel as SocketGuildChannel;

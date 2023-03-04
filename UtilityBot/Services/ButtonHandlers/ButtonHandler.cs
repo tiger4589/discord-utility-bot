@@ -20,6 +20,7 @@ public class ButtonHandler : IButtonHandler
         _cacheManager = cacheManager;
         _configuration = configuration;
         _messageHandler = messageHandler;
+        _client.ButtonExecuted -= ClientOnButtonExecuted;
         _client.ButtonExecuted += ClientOnButtonExecuted;
     }
 

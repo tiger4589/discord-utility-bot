@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Interactions;
 using UtilityBot.Services.JokesServices;
+using UtilityBot.Services.MagicEightBall;
 using UtilityBot.Services.RumbleServices;
 
 namespace UtilityBot.Modules;
@@ -9,11 +10,13 @@ public class GeneralModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly IJokeService _jokeService;
     private readonly IRumbleService _rumbleService;
+    private readonly IMagicEightBall _magicEightBall;
 
-    public GeneralModule(IJokeService jokeService, IRumbleService rumbleService)
+    public GeneralModule(IJokeService jokeService, IRumbleService rumbleService, IMagicEightBall magicEightBall)
     {
         _jokeService = jokeService;
         _rumbleService = rumbleService;
+        _magicEightBall = magicEightBall;
     }
 
     [SlashCommand("slap", "Slap a user mIRC style!")]
@@ -50,5 +53,12 @@ public class GeneralModule : InteractionModuleBase<SocketInteractionContext>
     {
         await RespondAsync("Unsubscribing... :(", ephemeral: true);
         _ = _rumbleService.Unsubscribe(Context);
+    }
+
+    [SlashCommand("magic-8-ball", "Let me tell you your fortune")]
+    public async Task Ask(string question)
+    {
+        await RespondAsync("Thinking...");
+        _ = _magicEightBall.Answer(Context, question);
     }
 }

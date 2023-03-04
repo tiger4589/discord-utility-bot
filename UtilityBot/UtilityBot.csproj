@@ -20,6 +20,7 @@
     <Folder Include="Services\MessageHandlers\" />
     <Folder Include="Services\ButtonHandlers\" />
     <Folder Include="Services\JokesServices\" />
+    <Folder Include="Services\MagicEightBall\" />
     <Folder Include="Services\SpamProtectionServices\" />
     <Folder Include="Services\RumbleServices\" />
     <Folder Include="Services\NoteServices\" />
