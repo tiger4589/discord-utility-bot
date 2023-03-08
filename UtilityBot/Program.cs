@@ -54,7 +54,8 @@ IServiceProvider BuildServiceProvider() => new ServiceCollection()
         var config = new DiscordSocketConfig
         {
             GatewayIntents = GatewayIntents.All,
-            UseInteractionSnowflakeDate = false
+            UseInteractionSnowflakeDate = false,
+            MessageCacheSize = 100
         };
 
         return new DiscordSocketClient(config);
@@ -67,7 +68,6 @@ IServiceProvider BuildServiceProvider() => new ServiceCollection()
     .AddSingleton<ICacheManager, CacheManager>()
     .AddSingleton<IPlayerService, PlayerService>()
     .AddSingleton<IEmbedMessageBuilder, EmbedMessageBuilder>()
-    .AddSingleton<IButtonHandler, ButtonHandler>()
     .AddSingleton<BotClient>()
     .AddSingleton<UtilityBot.Domain.Services.ConfigurationService.Interfaces.IConfigurationService, UtilityBot.Domain.Services.ConfigurationService.Services.ConfigurationService>()
     .AddSingleton<IMessageHandler, MessageHandler>()
@@ -94,7 +94,6 @@ void InitializeMainComponents()
     
     serviceProvider.GetRequiredService<IInteractionServiceServices>();
     serviceProvider.GetRequiredService<IUserJoinedService>();
-    serviceProvider.GetRequiredService<IButtonHandler>();
     serviceProvider.GetRequiredService<IJokeService>();
     serviceProvider.GetRequiredService<IRumbleService>();
     serviceProvider.GetRequiredService<ISpamProtectionService>();
