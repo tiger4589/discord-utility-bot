@@ -14,6 +14,9 @@ public interface IConfigurationService
     Task RemoveOnJoinRole(SocketInteractionContext context, ulong roleId);
     Task AddVerifyMessageConfiguration(SocketInteractionContext context, IRole role, string message);
 
+    Task AddCoderConfiguration(SocketInteractionContext context, ITextChannel channel, IRole role);
+
+
     public event EventHandler<ConfigurationServiceEventArgs> VerifyMessageConfigured; 
     public event EventHandler<ConfigurationServiceEventArgs> RoleConfigured;
     public event EventHandler<ConfigurationServiceEventArgs> RoleRemoved;

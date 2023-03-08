@@ -30,6 +30,7 @@ public class UtilityBotContext : DbContext
     public DbSet<MagicEightBallConfiguration>? MagicEightBallConfigurations { get; set; }
     public DbSet<MagicEightBallResponse>? MagicEightBallResponses { get; set; }
     public DbSet<EventsConfiguration>? EventsConfigurations { get; set; }
+    public DbSet<CoderRequestVerification>? CoderRequestVerifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

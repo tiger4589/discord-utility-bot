@@ -7,6 +7,7 @@ using UtilityBot.Services.ApiCallerServices;
 using UtilityBot.Services.CacheService;
 using UtilityBot.Services.GuildJoinedServices.Interfaces;
 using UtilityBot.Services.UserJoinedServices;
+using Logger = UtilityBot.Services.LoggingServices.Logger;
 
 namespace UtilityBot.Services.GuildJoinedServices.Managers;
 
@@ -57,7 +58,18 @@ public class GuildJoinedManager : IGuildJoinedManager
                 _cacheManager.AddOrUpdate(verifyMessageConfiguration);
             }
 
-            await LoggingServices.Logger.Log($"Should have initialized my cache!");
+            await Logger.Log($"Should have initialized my cache!");
+
+            var coderRequestVerification = await _configurationService.GetCoderRequestVerification();
+            if (coderRequestVerification == null)
+            {
+                await Logger.Log($"Coders Request Verification Is Not Ready");
+            }
+            else
+            {
+                _cacheManager.AddOrUpdate(coderRequestVerification);
+                await Logger.Log($"Loaded Coders Request Verification Configuration");
+            }
         }
         catch (Exception e)
         {

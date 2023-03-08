@@ -17,4 +17,13 @@ public class PlayerModule : InteractionModuleBase<SocketInteractionContext>
     {
         await _playerService.RequestVerification(Context, recruitLink);
     }
+
+    [SlashCommand("request-coder-status", "Request access to coders channels, alliance coders it is")]
+    public async Task RequestCoderStatus(
+        [Summary(description:"Your in-game recruit link")]string recruitLink,
+        [Summary(description: "Your in-game alliance link")] string allianceGameLink,
+        [Summary(description: "What kind of application do you code for your alliance?")] string role)
+    {
+        await _playerService.RequestCoderStatus(Context, recruitLink, allianceGameLink, role);
+    }
 }

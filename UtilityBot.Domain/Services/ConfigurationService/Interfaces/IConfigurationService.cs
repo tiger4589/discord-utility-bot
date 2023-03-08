@@ -33,4 +33,7 @@ public interface IConfigurationService
 
     Task AddConfiguration(CapsProtectionConfiguration configuration);
     Task<CapsProtectionConfiguration?> GetLatestCapsProtectionConfiguration();
+
+    Task AddCoderRequestVerification(CoderRequestVerification requestVerification);
+    Task<CoderRequestVerification?> GetCoderRequestVerification();
 }

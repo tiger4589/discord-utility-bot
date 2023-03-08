@@ -22,6 +22,22 @@ public class EmbedMessageBuilder : IEmbedMessageBuilder
         return builder.Build();
     }
 
+    public Embed BuildCoderRequestVerification(SocketUser user, string recruitLink, string allianceLink, string role)
+    {
+        var builder = CreateBuilder();
+        builder.WithTitle($"Coder Request for {user.Username}");
+        builder.WithColor(Color.Red);
+
+        var sb = new StringBuilder();
+        sb.AppendLine($"{user.Mention} - ({user.Username})");
+        sb.AppendLine(recruitLink);
+        sb.AppendLine($"Alliance Link: {allianceLink}");
+        sb.AppendLine($"Role as a coder: {role}");
+
+        builder.WithDescription(sb.ToString());
+        return builder.Build();
+    }
+
     public Embed BuildChuckNorrisFactEmbed(SocketInteractionContext context, ChuckNorrisJoke joke)
     {
         var builder = new EmbedBuilder

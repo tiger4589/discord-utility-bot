@@ -497,6 +497,18 @@ public class ConfigurationService : IConfigurationService
             .FirstOrDefaultAsync();
     }
 
+    public async Task AddCoderRequestVerification(CoderRequestVerification requestVerification)
+    {
+        await _context.CoderRequestVerifications!.AddAsync(requestVerification);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<CoderRequestVerification?> GetCoderRequestVerification()
+    {
+        return await _context.CoderRequestVerifications!.AsNoTracking().OrderByDescending(x => x.Id)
+            .FirstOrDefaultAsync();
+    }
+
     private async Task UpdateExistingServer(JoinedServer joinedServer, ConnectedServer connectedServer, bool isSave = false)
     {
         joinedServer.IsConnected = true;

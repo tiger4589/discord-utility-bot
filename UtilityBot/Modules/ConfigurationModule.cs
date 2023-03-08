@@ -165,6 +165,27 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
         }
     }
 
+    [Group("coders", "Configure coders configuration")]
+    public class CoderVerifyConfigurationModule : InteractionModuleBase<SocketInteractionContext>
+    {
+        private readonly IConfigurationService _configurationService;
+
+        public CoderVerifyConfigurationModule(IConfigurationService configurationService)
+        {
+            _configurationService = configurationService;
+        }
+
+        [SlashCommand("configure", "Configure Coders Request Verification")]
+        public async Task AddCodersConfiguration(
+            [Summary(description: "Choose channel to send request to")] ITextChannel channel,
+            [Summary(description: "Choose role to give upon verification")]
+            IRole role)
+        {
+            await RespondAsync($"Configuring...");
+            _ = _configurationService.AddCoderConfiguration(Context, channel, role);
+        }
+    }
+
     [Group("verify-configuration", "Add Verify Configuration")]
     public class VerifyConfigurationModule : InteractionModuleBase<SocketInteractionContext>
     {

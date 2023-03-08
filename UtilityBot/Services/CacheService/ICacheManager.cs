@@ -50,4 +50,7 @@ public interface ICacheManager
 
     IList<ulong> GetDeletedMessagesByBot();
     void AddDeletedMessageByBot(ulong messageId);
+
+    void AddOrUpdate(CoderRequestVerification requestVerification);
+    CoderRequestVerification? GetCoderRequestVerification();
 }

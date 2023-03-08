@@ -143,13 +143,20 @@ public class LoggingService : ILoggingService
 
         if (originalMessage != null)
         {
+            if (originalMessage.Content == arg2.Content)
+            {
+                await LogIfAvailable(EEventName.MessageUpdated,
+                    $"A Message has been updated in #{arg3.Name}{Environment.NewLine}New Message: {arg2.Content}{Environment.NewLine}**Couldn't retrieve old message**{Environment.NewLine}{arg2.GetJumpUrl()}");
+
+                return;
+            }
             await LogIfAvailable(EEventName.MessageUpdated,
-                $"A Message has been updated in #{arg3.Name}{Environment.NewLine} New Message: {arg2.Content}{Environment.NewLine} Old Message: {originalMessage.Content}");
+                $"A Message has been updated in #{arg3.Name}{Environment.NewLine}New Message: {arg2.Content}{Environment.NewLine}Old Message: {originalMessage.Content}{Environment.NewLine}{arg2.GetJumpUrl()}");
             return;
         }
 
         await LogIfAvailable(EEventName.MessageUpdated,
-            $"A Message has been updated in #{arg3.Name}{Environment.NewLine} New Message: {arg2.Content}{Environment.NewLine} **Couldn't retrieve old message**");
+            $"A Message has been updated in #{arg3.Name}{Environment.NewLine}New Message: {arg2.Content}{Environment.NewLine}**Couldn't retrieve old message**{Environment.NewLine}{arg2.GetJumpUrl()}");
     }
 
     private async Task ClientOnUserUpdated(SocketUser arg1, SocketUser arg2)

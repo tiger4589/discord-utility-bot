@@ -471,6 +471,23 @@ public class CacheManager : ICacheManager
         deletedMessage.Add(messageId);
     }
 
+    private readonly Hashtable _coderVerification = new Hashtable();
+    public void AddOrUpdate(CoderRequestVerification requestVerification)
+    {
+        _coderVerification.Clear();
+        _coderVerification.Add("conf", requestVerification);
+    }
+
+    public CoderRequestVerification? GetCoderRequestVerification()
+    {
+        if (!_coderVerification.ContainsKey("conf"))
+        {
+            return null;
+        }
+
+        return (CoderRequestVerification?)_coderVerification["conf"];
+    }
+
     public Configuration? GetGuildOnJoinConfiguration(ulong guildId)
     {
         if (!_userJoinConfiguration.ContainsKey(guildId))

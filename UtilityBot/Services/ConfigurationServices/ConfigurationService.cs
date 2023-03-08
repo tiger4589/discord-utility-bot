@@ -151,6 +151,23 @@ public class ConfigurationService : IConfigurationService
         RaiseVerifyMessageConfigured(new ConfigurationServiceEventArgs(context, $"Role to mention: {role.Mention} {Environment.NewLine} Message: {message}"));
     }
 
+    public async Task AddCoderConfiguration(SocketInteractionContext context, ITextChannel channel, IRole role)
+    {
+        var coderRequestVerification = new CoderRequestVerification
+        {
+            ChannelId = channel.Id,
+            RoleId = role.Id
+        };
+
+        await _configurationService.AddCoderRequestVerification(coderRequestVerification);
+
+        _cacheManager.AddOrUpdate(coderRequestVerification);
+
+        await context.Interaction.ModifyOriginalResponseAsync(prop =>
+            prop.Content =
+                $"Coders Request Verification will be sent to {channel.Name} and given {role.Name} role upon verification");
+    }
+
     private protected void RaiseVerifyConfigurationEvent(ConfigurationServiceEventArgs args)
     {
         var handler = VerifyConfigurationSet;
