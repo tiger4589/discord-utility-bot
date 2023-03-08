@@ -7,6 +7,7 @@ using UtilityBot.Services.EventLogService;
 using UtilityBot.Services.LoggingServices;
 using UtilityBot.Services.MagicEightBall;
 using UtilityBot.Services.RumbleServices;
+using UtilityBot.Services.Uno.Manager;
 
 namespace UtilityBot.Modules;
 
@@ -162,6 +163,31 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
 
             await e.InteractionContext.Interaction.ModifyOriginalResponseAsync(prop =>
                 prop.Content = "Couldn't add the configuration! You want it in public but didn't specify a channel!");
+        }
+    }
+
+    [Group("uno", "Uno Configuration Module")]
+    public class UnoConfigurationModule : InteractionModuleBase<SocketInteractionContext>
+    {
+        private readonly IUnoManager _unoManager;
+
+        public UnoConfigurationModule(IUnoManager unoManager)
+        {
+            _unoManager = unoManager;
+        }
+
+        [SlashCommand("enable", "Enable Uno In Selected Channel")]
+        public async Task EnableUno(ITextChannel channel)
+        {
+            await RespondAsync($"Enabling Uno In {channel.Name}");
+            _ = _unoManager.EnableUnoInChannel(Context, channel);
+        }
+
+        [SlashCommand("disable", "Disable Uno In Selected Channel")]
+        public async Task DisableUno(ITextChannel channel)
+        {
+            await RespondAsync($"Disabling Uno In {channel.Name}");
+            _ = _unoManager.DisableUnoInChannel(Context, channel);
         }
     }
 

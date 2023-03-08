@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using System.Collections;
+﻿using System.Collections;
 using UtilityBot.Contracts;
 using UtilityBot.Domain.DomainObjects;
 using UtilityBot.Services.LoggingServices;
@@ -12,19 +11,17 @@ namespace UtilityBot.Services.CacheService;
 
 public class CacheManager : ICacheManager
 {
-    private readonly Hashtable _userJoinConfiguration = new Hashtable();
-    private readonly Hashtable _userJoinMessage = new Hashtable();
-    private readonly Hashtable _userJoinRole = new Hashtable();
+    private readonly Hashtable _userJoinConfiguration = new();
+    private readonly Hashtable _userJoinMessage = new();
+    private readonly Hashtable _userJoinRole = new();
 
-    private readonly Hashtable _verifyConfiguration = new Hashtable();
-
-    private bool _isLoaded = false;
+    private readonly Hashtable _verifyConfiguration = new();
 
     public async void InitializeCache(Configuration? configuration, VerifyConfiguration? verifyConfiguration)
     {
         if (configuration == null)
         {
-            await Logger.Log($"Tried to initialize a null configuration");
+            await Logger.Log("Tried to initialize a null configuration");
             return;
         }
 
@@ -36,19 +33,15 @@ public class CacheManager : ICacheManager
         {
             AddOrUpdate(verifyConfiguration);
         }
-
-        _isLoaded = true;
     }
 
     public async void UpdateCache(Configuration? configuration)
     {
         if (configuration == null)
         {
-            await Logger.Log($"Tried to update a null configuration");
+            await Logger.Log("Tried to update a null configuration");
             return;
         }
-
-        //Todo: if _isLoaded = false, something is wrong.. do something about it
 
         UpdateUserJoinConfiguration(configuration);
     }
@@ -196,7 +189,7 @@ public class CacheManager : ICacheManager
             userJoinConfiguration.Remove(userJoinConfiguration.Single(x => x.Action == ActionTypeNames.AddRole));
         }
     }
-    private readonly Hashtable _logConfiguration = new Hashtable();
+    private readonly Hashtable _logConfiguration = new();
     public void AddOrUpdate(LogConfiguration logConfiguration)
     {
         var configuration = (LogConfiguration?)_logConfiguration["log_conf"];
@@ -218,7 +211,7 @@ public class CacheManager : ICacheManager
         return (LogConfiguration?)_logConfiguration["log_conf"];
     }
 
-    private readonly Hashtable _verifyMessageConfiguration = new Hashtable();
+    private readonly Hashtable _verifyMessageConfiguration = new();
     public VerifyMessageConfiguration? GetVerifyMessageConfiguration()
     {
         return (VerifyMessageConfiguration?)_verifyMessageConfiguration["conf"];
@@ -231,7 +224,7 @@ public class CacheManager : ICacheManager
         _verifyMessageConfiguration.Add("conf", verifyMessageConfiguration);
     }
 
-    private readonly Hashtable _jokesConfiguration = new Hashtable();
+    private readonly Hashtable _jokesConfiguration = new();
 
     public void AddOrUpdate(JokeConfiguration jokeConfiguration)
     {
@@ -267,7 +260,7 @@ public class CacheManager : ICacheManager
         return (JokeConfiguration?)_jokesConfiguration[jokeType];
     }
 
-    private readonly Hashtable _rumbleConfiguration = new Hashtable();
+    private readonly Hashtable _rumbleConfiguration = new();
 
     public void AddOrUpdate(RumbleConfiguration configuration)
     {
@@ -304,7 +297,7 @@ public class CacheManager : ICacheManager
         return (List<RumbleMessageConfiguration>)_rumbleConfiguration["msg_conf"]!;
     }
 
-    private readonly Hashtable _capsConfiguration = new Hashtable();
+    private readonly Hashtable _capsConfiguration = new();
     public void AddOrUpdate(CapsProtectionConfiguration configuration)
     {
         if (_capsConfiguration.ContainsKey("conf"))
@@ -320,7 +313,7 @@ public class CacheManager : ICacheManager
         return (CapsProtectionConfiguration?)_capsConfiguration["conf"];
     }
 
-    private readonly Hashtable _8BallConfiguration = new Hashtable();
+    private readonly Hashtable _8BallConfiguration = new();
     public void AddOrUpdate(MagicEightBallConfiguration configuration)
     {
         if (_8BallConfiguration.ContainsKey("conf"))
@@ -374,7 +367,7 @@ public class CacheManager : ICacheManager
         }
     }
 
-    private readonly Hashtable _eventsConf = new Hashtable();
+    private readonly Hashtable _eventsConf = new();
 
     public void LoadEventsConfiguration(IList<EventsConfiguration> configurations)
     {
@@ -435,7 +428,7 @@ public class CacheManager : ICacheManager
         singleOrDefault.IsEnabled = false;
     }
 
-    private readonly Hashtable _deletedMessages = new Hashtable();
+    private readonly Hashtable _deletedMessages = new();
     public IList<ulong> GetDeletedMessagesByBot()
     {
         if (!_deletedMessages.ContainsKey("messages"))
@@ -471,7 +464,7 @@ public class CacheManager : ICacheManager
         deletedMessage.Add(messageId);
     }
 
-    private readonly Hashtable _coderVerification = new Hashtable();
+    private readonly Hashtable _coderVerification = new();
     public void AddOrUpdate(CoderRequestVerification requestVerification)
     {
         _coderVerification.Clear();
@@ -486,6 +479,66 @@ public class CacheManager : ICacheManager
         }
 
         return (CoderRequestVerification?)_coderVerification["conf"];
+    }
+
+    private readonly Hashtable _unoConfiguration  = new();
+    public void AddUnoConfiguration(ulong channelId)
+    {
+        if (!_unoConfiguration.ContainsKey("conf"))
+        {
+            List<ulong> list = new List<ulong> {channelId};
+            _unoConfiguration.Add("conf", list);
+            return;
+        }
+
+        var ids = (List<ulong>?)_unoConfiguration["conf"];
+
+        if (ids == null)
+        {
+            _unoConfiguration.Clear();
+            List<ulong> list = new List<ulong> { channelId };
+            _unoConfiguration.Add("conf", list);
+            return;
+        }
+
+        ids.Add(channelId);
+    }
+
+    public void RemoveUnoConfiguration(ulong channelId)
+    {
+        if (!_unoConfiguration.ContainsKey("conf"))
+        {
+            return;
+        }
+
+        var ids = (List<ulong>?)_unoConfiguration["conf"];
+
+        if (ids == null)
+        {
+            return;
+        }
+
+        if (ids.Contains(channelId))
+        {
+            ids.Remove(channelId);
+        }
+    }
+
+    public IList<ulong> GetAllUnoConfigurations()
+    {
+        if (!_unoConfiguration.ContainsKey("conf"))
+        {
+            return new List<ulong>();
+        }
+
+        var ids = (List<ulong>?)_unoConfiguration["conf"];
+
+        if (ids == null)
+        {
+            return new List<ulong>();
+        }
+
+        return ids;
     }
 
     public Configuration? GetGuildOnJoinConfiguration(ulong guildId)

@@ -26,6 +26,8 @@
     <Folder Include="Services\RumbleServices\" />
     <Folder Include="Services\NoteServices\" />
     <Folder Include="Services\PlayerServices\" />
+    <Folder Include="Services\Uno\Game\" />
+    <Folder Include="Services\Uno\Manager\" />
     <Folder Include="Services\UserJoinedServices\" />
   </ItemGroup>
 

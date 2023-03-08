@@ -9,7 +9,6 @@
   <ItemGroup>
     <Folder Include="Database\" />
     <Folder Include="Mappers\" />
-    <Folder Include="Services\ConfigurationService\Interfaces\" />
     <Folder Include="Services\ConfigurationService\Services\" />
   </ItemGroup>
 

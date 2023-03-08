@@ -53,4 +53,8 @@ public interface ICacheManager
 
     void AddOrUpdate(CoderRequestVerification requestVerification);
     CoderRequestVerification? GetCoderRequestVerification();
+
+    void AddUnoConfiguration(ulong channelId);
+    void RemoveUnoConfiguration(ulong channelId);
+    IList<ulong> GetAllUnoConfigurations();
 }

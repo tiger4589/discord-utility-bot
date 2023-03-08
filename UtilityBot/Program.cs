@@ -24,6 +24,7 @@ using UtilityBot.Services.NoteServices;
 using UtilityBot.Services.PlayerServices;
 using UtilityBot.Services.RumbleServices;
 using UtilityBot.Services.SpamProtectionServices;
+using UtilityBot.Services.Uno.Manager;
 using UtilityBot.Services.UserJoinedServices;
 using ConfigurationService = UtilityBot.Services.ConfigurationServices.ConfigurationService;
 using IConfigurationService = UtilityBot.Services.ConfigurationServices.IConfigurationService;
@@ -85,6 +86,8 @@ IServiceProvider BuildServiceProvider() => new ServiceCollection()
     .AddSingleton<IMagicEightBall, MagicEightBall>()
     .AddSingleton<IEventConfiguration, EventConfiguration>()
     .AddSingleton<IEventService, EventService>()
+    .AddSingleton<IUnoConfigurationService, UnoConfigurationService>()
+    .AddSingleton<IUnoManager, UnoManager>()
     .BuildServiceProvider();
 
 void InitializeMainComponents()
@@ -101,5 +104,6 @@ void InitializeMainComponents()
     serviceProvider.GetRequiredService<IRumbleService>();
     serviceProvider.GetRequiredService<ISpamProtectionService>();
     serviceProvider.GetRequiredService<IMagicEightBall>();
+    serviceProvider.GetRequiredService<IUnoManager>();
 }
 

@@ -31,7 +31,7 @@ public class UtilityBotContext : DbContext
     public DbSet<MagicEightBallResponse>? MagicEightBallResponses { get; set; }
     public DbSet<EventsConfiguration>? EventsConfigurations { get; set; }
     public DbSet<CoderRequestVerification>? CoderRequestVerifications { get; set; }
-
+    public DbSet<UnoConfiguration>? UnoConfigurations { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserJoinConfiguration>().HasKey(x => new { x.GuildId, ActionType = x.Action });
