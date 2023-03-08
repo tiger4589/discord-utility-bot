@@ -29,6 +29,8 @@ public class UtilityBotContext : DbContext
     public DbSet<CapsProtectionConfiguration>? CapsProtectionConfigurations { get; set; }
     public DbSet<MagicEightBallConfiguration>? MagicEightBallConfigurations { get; set; }
     public DbSet<MagicEightBallResponse>? MagicEightBallResponses { get; set; }
+    public DbSet<EventsConfiguration>? EventsConfigurations { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserJoinConfiguration>().HasKey(x => new { x.GuildId, ActionType = x.Action });
@@ -145,5 +147,20 @@ public class UtilityBotContext : DbContext
                 Message = "Very doubtful."
             }
         });
+
+        int i = 1;
+        foreach (var name in EventsName.EventsNames)
+        {
+            modelBuilder.Entity<EventsConfiguration>().HasData(new List<EventsConfiguration>()
+            {
+                new EventsConfiguration
+                {
+                    EventName = name,
+                    Id = i,
+                    IsEnabled = true
+                }
+            });
+            i++;
+        }
     }
 }

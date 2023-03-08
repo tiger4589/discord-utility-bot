@@ -1,7 +1,9 @@
 ﻿using Discord;
 using Discord.Interactions;
+using UtilityBot.Domain.DomainObjects;
 using UtilityBot.EventArguments;
 using UtilityBot.Services.ConfigurationServices;
+using UtilityBot.Services.EventLogService;
 using UtilityBot.Services.LoggingServices;
 using UtilityBot.Services.MagicEightBall;
 using UtilityBot.Services.RumbleServices;
@@ -414,6 +416,31 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
         {
             await RespondAsync("Disabling...");
             _ = _magicEightBall.Disable(Context);
+        }
+    }
+
+    [Group("events", "Manage events configuration")]
+    public class EventConfigurationModule : InteractionModuleBase<SocketInteractionContext>
+    {
+        private readonly IEventService _eventService;
+
+        public EventConfigurationModule(IEventService eventService)
+        {
+            _eventService = eventService;
+        }
+
+        [SlashCommand("enable", "Enable a specific event")]
+        public async Task EnableEvent(EEventName eventName)
+        {
+            await RespondAsync($"Enabling {eventName}");
+            _ = _eventService.EnableEvent(Context, eventName);
+        }
+
+        [SlashCommand("disable", "Disable a specific event")]
+        public async Task DisableEvent(EEventName eventName)
+        {
+            await RespondAsync($"Disabling {eventName}");
+            _ = _eventService.DisableEvent(Context, eventName);
         }
     }
 }

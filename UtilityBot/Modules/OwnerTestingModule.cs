@@ -1,5 +1,7 @@
-﻿using Discord;
+﻿using System.Runtime.CompilerServices;
+using Discord;
 using Discord.Interactions;
+using UtilityBot.Domain.DomainObjects;
 using UtilityBot.Services.UserJoinedServices;
 
 namespace UtilityBot.Modules;
@@ -20,5 +22,11 @@ public class OwnerTestingModule : InteractionModuleBase<SocketInteractionContext
     {
         await _userJoinedService.TriggerSendMessageOnJoin(user);
         await RespondAsync("Done", ephemeral: true);
+    }
+
+    [SlashCommand("test-choices", "just-testing-choices")]
+    public async Task ChooseEvent(EEventName eventName)
+    {
+        await RespondAsync($"You have chosen {eventName}");
     }
 }

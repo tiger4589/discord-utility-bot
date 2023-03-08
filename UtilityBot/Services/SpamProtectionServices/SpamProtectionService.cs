@@ -77,6 +77,7 @@ public class SpamProtectionService : ISpamProtectionService
         {
             await Logger.Log($"Caps Protection! Warned {arg.Author.Username} for saying {arg.Content} in #{arg.Channel.Name}");
             var myMessage = await arg.Channel.SendMessageAsync($"{arg.Author.Mention} TOO MUCH CAPS! TOO MUCH CAPS! TOO MUCH CAPS!");
+            _cacheManager.AddDeletedMessageByBot(arg.Id);
             await arg.DeleteAsync();
             await Task.Delay(1750);
             await myMessage.DeleteAsync();

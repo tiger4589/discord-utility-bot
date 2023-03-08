@@ -374,6 +374,103 @@ public class CacheManager : ICacheManager
         }
     }
 
+    private readonly Hashtable _eventsConf = new Hashtable();
+
+    public void LoadEventsConfiguration(IList<EventsConfiguration> configurations)
+    {
+        _eventsConf.Clear();
+        _eventsConf.Add("conf", configurations);
+    }
+
+    public EventsConfiguration? GetEventConfiguration(EEventName eventType)
+    {
+        if (!_eventsConf.ContainsKey("conf"))
+        {
+            return null;
+        }
+
+        var eventsConfigurations = (IList<EventsConfiguration>?)_eventsConf["conf"];
+        if (eventsConfigurations == null)
+        {
+            return null;
+        }
+
+        var singleOrDefault = eventsConfigurations.SingleOrDefault(x => x.EventName == $"{eventType}");
+        return singleOrDefault;
+    }
+
+    public void EnableEvent(EEventName eventType)
+    {
+        if (!_eventsConf.ContainsKey("conf"))
+        {
+            return;
+        }
+
+        var eventsConfigurations = (IList<EventsConfiguration>?)_eventsConf["conf"];
+
+        var singleOrDefault = eventsConfigurations?.SingleOrDefault(x => x.EventName == $"{eventType}");
+        if (singleOrDefault == null)
+        {
+            return;
+        }
+
+        singleOrDefault.IsEnabled = true;
+    }
+
+    public void DisableEvent(EEventName eventType)
+    {
+        if (!_eventsConf.ContainsKey("conf"))
+        {
+            return;
+        }
+
+        var eventsConfigurations = (IList<EventsConfiguration>?)_eventsConf["conf"];
+
+        var singleOrDefault = eventsConfigurations?.SingleOrDefault(x => x.EventName == $"{eventType}");
+        if (singleOrDefault == null)
+        {
+            return;
+        }
+
+        singleOrDefault.IsEnabled = false;
+    }
+
+    private readonly Hashtable _deletedMessages = new Hashtable();
+    public IList<ulong> GetDeletedMessagesByBot()
+    {
+        if (!_deletedMessages.ContainsKey("messages"))
+        {
+            return new List<ulong>();
+        }
+
+        var deletedMessage = (List<ulong>?)_deletedMessages["messages"];
+        if (deletedMessage == null)
+        {
+            return new List<ulong>();
+        }
+
+        return deletedMessage;
+    }
+
+    public void AddDeletedMessageByBot(ulong messageId)
+    {
+        if (!_deletedMessages.ContainsKey("messages"))
+        {
+            _deletedMessages.Add("messages", new List<ulong> {messageId});
+            return;
+        }
+
+        var deletedMessage = (List<ulong>?)_deletedMessages["messages"];
+        if (deletedMessage == null)
+        {
+            _deletedMessages.Clear();
+            _deletedMessages.Add("messages", new List<ulong> { messageId });
+            return;
+        }
+
+        deletedMessage.Add(messageId);
+    }
+
     public Configuration? GetGuildOnJoinConfiguration(ulong guildId)
     {
         if (!_userJoinConfiguration.ContainsKey(guildId))

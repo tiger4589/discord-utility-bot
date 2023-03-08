@@ -40,4 +40,14 @@ public interface ICacheManager
     IList<MagicEightBallResponse> GetMagicEightBallResponses();
     void EnableMagicEightBall();
     void DisableMagicEightBall();
+
+
+    void LoadEventsConfiguration(IList<EventsConfiguration> configurations);
+    EventsConfiguration? GetEventConfiguration(EEventName eventType);
+    void EnableEvent(EEventName eventType);
+    void DisableEvent(EEventName eventType);
+
+
+    IList<ulong> GetDeletedMessagesByBot();
+    void AddDeletedMessageByBot(ulong messageId);
 }

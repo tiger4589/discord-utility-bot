@@ -12,6 +12,7 @@ using UtilityBot.Domain.Services.ConfigurationService.Services;
 using UtilityBot.Domain.Services.UserNoteServices;
 using UtilityBot.Services.ButtonHandlers;
 using UtilityBot.Services.CacheService;
+using UtilityBot.Services.EventLogService;
 using UtilityBot.Services.GuildJoinedServices.Interfaces;
 using UtilityBot.Services.GuildJoinedServices.Managers;
 using UtilityBot.Services.InteractionServiceManager;
@@ -82,6 +83,8 @@ IServiceProvider BuildServiceProvider() => new ServiceCollection()
     .AddSingleton<ISpamProtectionService, SpamProtectionService>()
     .AddSingleton<IMagicEightBallService, MagicEightBallService>()
     .AddSingleton<IMagicEightBall, MagicEightBall>()
+    .AddSingleton<IEventConfiguration, EventConfiguration>()
+    .AddSingleton<IEventService, EventService>()
     .BuildServiceProvider();
 
 void InitializeMainComponents()
