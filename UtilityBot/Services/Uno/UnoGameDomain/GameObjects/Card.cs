@@ -32,7 +32,20 @@ public class Card
         }
     }
 
-    public string GetImageUrl() => $"https://raw.githubusercontent.com/WilliamWelsh/UNO/main/images/{Color}{Value}{(Special == ESpecial.None ? "" : Special)}.png";
+    public string GetImageUrl(EColor color = EColor.None)
+    {
+        if (Special == ESpecial.None)
+        {
+            return $"https://raw.githubusercontent.com/tiger4589/discord-utility-bot/main/UtilityBot/Services/Uno/UnoGameDomain/images/{Color}{Value}.png";
+        }
+
+        if (color == EColor.None)
+        {
+            return $"https://raw.githubusercontent.com/tiger4589/discord-utility-bot/main/UtilityBot/Services/Uno/UnoGameDomain/images/{Color}{Value}{Special}.png";
+        }
+
+        return $"https://raw.githubusercontent.com/tiger4589/discord-utility-bot/main/UtilityBot/Services/Uno/UnoGameDomain/images/{color}{Value}{Special}.png";
+    }
 
     public override string ToString()
     {

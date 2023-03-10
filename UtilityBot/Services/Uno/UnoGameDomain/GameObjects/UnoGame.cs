@@ -4,7 +4,6 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using UtilityBot.Services.Uno.UnoGameDomain.GameAssets;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace UtilityBot.Services.Uno.UnoGameDomain.GameObjects;
 
@@ -276,7 +275,7 @@ public class UnoGame
                         .WithName($"{nextPlayer!.SocketUser.Username}'s Turn - Round #{_turn}")
                         .WithIconUrl(nextPlayer.SocketUser.GetAvatarUrl() ?? nextPlayer.SocketUser.GetDefaultAvatarUrl()))
                     .WithDescription($"{sb}")
-                    .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl())
+                    .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl(_lastCardColor))
                     .WithFields(new EmbedFieldBuilder()
                     {
                         Name = $"Players {(_isReversed ? "🔃" : "")}",
@@ -301,7 +300,7 @@ public class UnoGame
                         .WithName($"{nextPlayer!.SocketUser.Username}'s Turn - Round #{_turn}")
                         .WithIconUrl(nextPlayer.SocketUser.GetAvatarUrl() ?? nextPlayer.SocketUser.GetDefaultAvatarUrl()))
                     .WithDescription($"{sb}")
-                    .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl())
+                    .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl(_lastCardColor))
                     .WithFields(new EmbedFieldBuilder()
                     {
                         Name = $"Players {(_isReversed ? "🔃" : "")}",
@@ -345,7 +344,7 @@ public class UnoGame
                         .WithName(_winner!.SocketUser.Username)
                         .WithIconUrl(_winner!.SocketUser.GetAvatarUrl() ?? _winner!.SocketUser.GetDefaultAvatarUrl()))
                     .WithDescription($"{_winner!.SocketUser.Username} has won after {_turn} rounds!")
-                    .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl())
+                    .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl(_lastCardColor))
                     .Build();
 
                 m.Components = null;
@@ -568,7 +567,7 @@ public class UnoGame
                         .WithName($"{nextPlayer!.SocketUser.Username}'s Turn - Round #{_turn}")
                         .WithIconUrl(nextPlayer.SocketUser.GetAvatarUrl() ?? nextPlayer.SocketUser.GetDefaultAvatarUrl()))
                     .WithDescription($"{potentialPlayer.SocketUser.Mention} drew 1 card and lost his turn!{Environment.NewLine}Top card is {DiscardPile!.Peek()}")
-                    .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl())
+                    .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl(_lastCardColor))
                     .WithFields(new EmbedFieldBuilder()
                     {
                         Name = $"Players {(_isReversed ? "🔃" : "")}",
@@ -593,7 +592,7 @@ public class UnoGame
                         .WithName($"{nextPlayer!.SocketUser.Username}'s Turn - Round #{_turn}")
                         .WithIconUrl(nextPlayer.SocketUser.GetAvatarUrl() ?? nextPlayer.SocketUser.GetDefaultAvatarUrl()))
                     .WithDescription($"{potentialPlayer.SocketUser.Mention} drew 1 card and lost his turn!{Environment.NewLine}Top card is {DiscardPile!.Peek()}")
-                    .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl())
+                    .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl(_lastCardColor))
                     .WithFields(new EmbedFieldBuilder()
                     {
                         Name = $"Players {(_isReversed ? "🔃" : "")}",
