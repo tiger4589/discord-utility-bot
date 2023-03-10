@@ -29,4 +29,12 @@ public class OwnerTestingModule : InteractionModuleBase<SocketInteractionContext
     {
         await RespondAsync($"You have chosen {eventName}");
     }
+
+    //[SlashCommand("test-shuffle", "just-testing-shuffle")]
+    //public async Task ShuffleDeck()
+    //{
+    //    UnoGame game = new();
+    //    game.ShuffleDeck();
+    //    await RespondAsync("done");
+    //}
 }

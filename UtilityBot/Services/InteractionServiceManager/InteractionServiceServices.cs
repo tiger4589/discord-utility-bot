@@ -26,17 +26,24 @@ public class InteractionServiceServices : IInteractionServiceServices
 
     public async Task InitializeService()
     {
-        _interactionService = new InteractionService(_client);
-        await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
+        try
+        {
+            _interactionService = new InteractionService(_client);
+            await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
 
-        await _interactionService.RegisterCommandsToGuildAsync(ulong.Parse(_configuration["ServerId"]!));
+            await _interactionService.RegisterCommandsToGuildAsync(ulong.Parse(_configuration["ServerId"]!));
 
-        _interactionService.SlashCommandExecuted += InteractionServiceOnSlashCommandExecuted;
+            _interactionService.SlashCommandExecuted += InteractionServiceOnSlashCommandExecuted;
 
-        _client.InteractionCreated -= ClientOnInteractionCreated;
-        _client.InteractionCreated += ClientOnInteractionCreated;
+            _client.InteractionCreated -= ClientOnInteractionCreated;
+            _client.InteractionCreated += ClientOnInteractionCreated;
 
-        await Logger.Log("Should have set up my slash commands and ready to listen!");
+            await Logger.Log("Should have set up my slash commands and ready to listen!");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"{e}");
+        }
     }
 
     private async Task ClientOnInteractionCreated(SocketInteraction arg)

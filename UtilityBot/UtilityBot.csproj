@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\Uno\UnoGame\**" />
+    <EmbeddedResource Remove="Services\Uno\UnoGame\**" />
+    <None Remove="Services\Uno\UnoGame\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Client\" />
     <Folder Include="Modules\" />
     <Folder Include="Services\GuildJoinedServices\Interfaces\" />
@@ -26,8 +32,6 @@
     <Folder Include="Services\RumbleServices\" />
     <Folder Include="Services\NoteServices\" />
     <Folder Include="Services\PlayerServices\" />
-    <Folder Include="Services\Uno\Game\" />
-    <Folder Include="Services\Uno\Manager\" />
     <Folder Include="Services\UserJoinedServices\" />
   </ItemGroup>
 

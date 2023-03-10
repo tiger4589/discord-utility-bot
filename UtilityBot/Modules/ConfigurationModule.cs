@@ -166,7 +166,7 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
         }
     }
 
-    [Group("uno", "Uno Configuration Module")]
+    [Group("uno-game", "Uno Configuration Module")]
     public class UnoConfigurationModule : InteractionModuleBase<SocketInteractionContext>
     {
         private readonly IUnoManager _unoManager;

@@ -10,7 +10,6 @@ using UtilityBot.Domain.Mappers;
 using UtilityBot.Domain.Services.ConfigurationService.Interfaces;
 using UtilityBot.Domain.Services.ConfigurationService.Services;
 using UtilityBot.Domain.Services.UserNoteServices;
-using UtilityBot.Services.ButtonHandlers;
 using UtilityBot.Services.CacheService;
 using UtilityBot.Services.EventLogService;
 using UtilityBot.Services.GuildJoinedServices.Interfaces;
@@ -88,6 +87,7 @@ IServiceProvider BuildServiceProvider() => new ServiceCollection()
     .AddSingleton<IEventService, EventService>()
     .AddSingleton<IUnoConfigurationService, UnoConfigurationService>()
     .AddSingleton<IUnoManager, UnoManager>()
+    .AddSingleton<IUnoGameManager, UnoGameManager>()
     .BuildServiceProvider();
 
 void InitializeMainComponents()
