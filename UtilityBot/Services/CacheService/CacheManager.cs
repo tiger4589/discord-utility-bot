@@ -482,8 +482,32 @@ public class CacheManager : ICacheManager
     }
 
     private readonly Hashtable _unoConfiguration  = new();
-    public void AddUnoConfiguration(ulong channelId)
+    private readonly Hashtable _unoRoleConfiguration = new();
+
+    private void AddChannelRoleToPing(ulong channelId, ulong roleId)
     {
+        if (_unoRoleConfiguration.ContainsKey(channelId))
+        {
+            _unoRoleConfiguration.Remove(channelId);
+        }
+
+        _unoRoleConfiguration.Add(channelId, roleId);
+    }
+
+    public ulong? GetRoleIdForChannel(ulong channelId)
+    {
+        var value = _unoRoleConfiguration[$"{channelId}"];
+        if (value == null)
+        {
+            return null;
+        }
+
+        return ulong.Parse(value.ToString() ?? string.Empty);
+    }
+
+    public void AddUnoConfiguration(ulong channelId, ulong roleId)
+    {
+        AddChannelRoleToPing(channelId, roleId);
         if (!_unoConfiguration.ContainsKey("conf"))
         {
             List<ulong> list = new List<ulong> {channelId};

@@ -18,7 +18,7 @@ public class UnoGameModule : InteractionModuleBase<SocketInteractionContext>
     [SlashCommand("initialize-uno", "Start a new game of UNO!")]
     public async Task InitializeUno()
     {
-        await RespondAsync("Initializing a new game", ephemeral: true);
+        await RespondAsync("Initializing a new game");
         _ = _unoGameManager.InitializeGame(Context);
     }
 
@@ -67,15 +67,21 @@ public class UnoGameModule : InteractionModuleBase<SocketInteractionContext>
         await _unoGameManager.DrawCard(Context);
     }
 
-    //[ComponentInteraction("cancel-uno_*")]
-    //public async Task CancelUno(Guid gameId)
-    //{
+    [ComponentInteraction("leave-during-game_*")]
+    public async Task CancelUno(string gameId)
+    {
+        await _unoGameManager.LeaveDuringGame((SocketMessageComponent)Context.Interaction, Guid.Parse(gameId));
+    }
 
-    //}
+    [ComponentInteraction("leave-uno_*")]
+    public async Task LeaveUno(string gameId)
+    {
+        await _unoGameManager.LeaveGame((SocketMessageComponent)Context.Interaction, Guid.Parse(gameId));
+    }
 
-    //[ComponentInteraction("leave-uno_*")]
-    //public async Task LeaveUno(Guid gameId)
-    //{
-
-    //}
+    [ComponentInteraction("cancel-wild_*")]
+    public async Task CancelWild(string gameId)
+    {
+        await _unoGameManager.CancelWild((SocketMessageComponent)Context.Interaction, Guid.Parse(gameId));
+    }
 }

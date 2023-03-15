@@ -14,11 +14,12 @@ public class UnoConfigurationService : IUnoConfigurationService
         _context = context;
     }
 
-    public async Task AddUnoConfiguration(ulong channelId)
+    public async Task AddUnoConfiguration(ulong channelId, ulong roleId)
     {
         await _context.UnoConfigurations!.AddAsync(new UnoConfiguration
         {
-            ChannelId = channelId
+            ChannelId = channelId,
+            RoleId = roleId
         });
 
         await _context.SaveChangesAsync();

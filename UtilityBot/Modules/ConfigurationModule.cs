@@ -177,10 +177,10 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
         }
 
         [SlashCommand("enable", "Enable Uno In Selected Channel")]
-        public async Task EnableUno(ITextChannel channel)
+        public async Task EnableUno(ITextChannel channel, IRole role)
         {
             await RespondAsync($"Enabling Uno In {channel.Name}");
-            _ = _unoManager.EnableUnoInChannel(Context, channel);
+            _ = _unoManager.EnableUnoInChannel(Context, channel, role);
         }
 
         [SlashCommand("disable", "Disable Uno In Selected Channel")]

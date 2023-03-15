@@ -1,9 +1,9 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text;
+﻿using System.Text;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using UtilityBot.Services.Uno.UnoGameDomain.GameAssets;
+using Timer = System.Timers.Timer;
 
 namespace UtilityBot.Services.Uno.UnoGameDomain.GameObjects;
 
@@ -263,6 +263,16 @@ public class UnoGame
             await currentPlayer.UpdateCardMenu(null, DiscardPile!.Peek(), _lastCardColor, true);
         }
 
+        if (_timer is { Enabled: true })
+        {
+            _timer.Stop();
+        }
+
+        _timer = new Timer(2 * 60 * 1000);
+        _timer.Elapsed += async (sender, args) => await RemoveInactivePlayer(nextPlayer);
+        _timer.AutoReset = false;
+        _timer.Enabled = true;
+
         var initialCommand = (SocketMessageComponent)_socketInteraction;
 
         if (_turn == 1)
@@ -285,8 +295,7 @@ public class UnoGame
 
                 m.Components = new ComponentBuilder()
                     .WithButton("View Cards", $"show-card-prompt", row: 0, style: ButtonStyle.Secondary)
-                    .WithButton("Leave Game", $"leave-during-game", row: 0, style: ButtonStyle.Secondary)
-                    .WithButton("End Game", $"end-during-game", row: 0, style: ButtonStyle.Secondary)
+                    .WithButton("Leave Game", $"leave-during-game_{Id}", row: 0, style: ButtonStyle.Secondary)
                     .Build();
             });
         }
@@ -310,11 +319,17 @@ public class UnoGame
 
                 m.Components = new ComponentBuilder()
                     .WithButton("View Cards", $"show-card-prompt", row: 0, style: ButtonStyle.Secondary)
-                    .WithButton("Leave Game", $"leave-during-game", row: 0, style: ButtonStyle.Secondary)
-                    .WithButton("End Game", $"end-during-game", row: 0, style: ButtonStyle.Secondary)
+                    .WithButton("Leave Game", $"leave-during-game_{Id}", row: 0, style: ButtonStyle.Secondary)
                     .Build();
             });
         }
+    }
+
+    private Timer? _timer;
+    private async Task RemoveInactivePlayer(Player player)
+    {
+        _players.Remove(player);
+        await DoTurn(false);
     }
 
     private async Task CheckForWinner()
@@ -472,7 +487,7 @@ public class UnoGame
                         .WithButton("Green", $"wild_Green_{cardId}", style: ButtonStyle.Secondary, new Emoji("🟩"))
                         .WithButton("Blue", $"wild_Blue_{cardId}", style: ButtonStyle.Secondary, new Emoji("🟦"))
                         .WithButton("Yellow", $"wild_Yellow_{cardId}", style: ButtonStyle.Secondary, new Emoji("🟨"))
-                        .WithButton("Cancel", "cancel-wild", style: ButtonStyle.Secondary)
+                        .WithButton("Cancel", $"cancel-wild_{Id}", style: ButtonStyle.Secondary)
                         .Build();
                 });
                 return;
@@ -490,7 +505,7 @@ public class UnoGame
                     .WithButton("Green", $"wild_Green_{cardId}", style: ButtonStyle.Secondary, new Emoji("🟩"))
                     .WithButton("Blue", $"wild_Blue_{cardId}", style: ButtonStyle.Secondary, new Emoji("🟦"))
                     .WithButton("Yellow", $"wild_Yellow_{cardId}", style: ButtonStyle.Secondary, new Emoji("🟨"))
-                    .WithButton("Cancel", "cancel-wild", style: ButtonStyle.Secondary)
+                    .WithButton("Cancel", $"cancel-wild_{Id}", style: ButtonStyle.Secondary)
                     .Build();
             });
             return;
@@ -577,8 +592,7 @@ public class UnoGame
 
                 m.Components = new ComponentBuilder()
                     .WithButton("View Cards", $"show-card-prompt", row: 0, style: ButtonStyle.Secondary)
-                    .WithButton("Leave Game", $"leave-during-game", row: 0, style: ButtonStyle.Secondary)
-                    .WithButton("End Game", $"end-during-game", row: 0, style: ButtonStyle.Secondary)
+                    .WithButton("Leave Game", $"leave-during-game_{Id}", row: 0, style: ButtonStyle.Secondary)
                     .Build();
             });
         }
@@ -602,8 +616,7 @@ public class UnoGame
 
                 m.Components = new ComponentBuilder()
                     .WithButton("View Cards", $"show-card-prompt", row: 0, style: ButtonStyle.Secondary)
-                    .WithButton("Leave Game", $"leave-during-game", row: 0, style: ButtonStyle.Secondary)
-                    .WithButton("End Game", $"end-during-game", row: 0, style: ButtonStyle.Secondary)
+                    .WithButton("Leave Game", $"leave-during-game_{Id}", row: 0, style: ButtonStyle.Secondary)
                     .Build();
             });
         }
@@ -657,5 +670,81 @@ public class UnoGame
             await potentialPlayer.UpdateCardMenu((SocketMessageComponent)context.Interaction, card, _lastCardColor,
                 _players[_playerIndex].SocketUser.Id == context.User.Id, $"You played a {card} {color}");
         }
+    }
+
+    public async Task RemovePlayer(SocketMessageComponent context)
+    {
+        var player = _players.Single(x => x.SocketUser.Id == context.User.Id);
+        _players.Remove(player);
+
+        if (Host.SocketUser.Id == player.SocketUser.Id)
+        {
+            await context.UpdateAsync(m =>
+            {
+                m.Embed = new EmbedBuilder()
+                    .WithColor(Colors.Red)
+                    .WithAuthor(new EmbedAuthorBuilder()
+                        .WithName("UNO"))
+                    .WithDescription($"{Host.SocketUser.Username} left the game as a host, game ends here!")
+                    .Build();
+
+                m.Components = new ComponentBuilder()
+                    .Build();
+            });
+
+            _isGameOver = true;
+            return;
+        }
+
+        if (NumberOfPlayers == 0)
+        {
+            await context.UpdateAsync(m =>
+            {
+                m.Embed = new EmbedBuilder()
+                    .WithColor(Colors.Red)
+                    .WithAuthor(new EmbedAuthorBuilder()
+                        .WithName("UNO"))
+                    .WithDescription($"{player.SocketUser.Username} left the game and no more players are in! Game ended!!")
+                    .Build();
+
+                m.Components = new ComponentBuilder()
+                    .Build();
+            });
+
+            _isGameOver = true;
+            return;
+        }
+
+        await context.UpdateAsync(m =>
+        {
+            m.Embed = new EmbedBuilder()
+                .WithColor(Colors.Red)
+                .WithAuthor(new EmbedAuthorBuilder()
+                    .WithName("UNO"))
+                .WithDescription($"{Host.SocketUser.Username} has started a game of UNO! Click the button below to join!\n\n{ListPlayers(listCardCount: false)}\n\n*{context.User.Username} just left*")
+                .Build();
+
+            m.Components = new ComponentBuilder()
+                .WithButton("Start Game", $"start-uno_{Id}", row: 0, style: ButtonStyle.Secondary, disabled: NumberOfPlayers < UnoGameConfiguration.MinimumPlayers)
+                .WithButton("Join Game", $"join-uno_{Id}", row: 1, style: ButtonStyle.Secondary, disabled: NumberOfPlayers == UnoGameConfiguration.MaximumPlayers)
+                .WithButton("Leave Game", $"leave-uno_{Id}", row: 1, style: ButtonStyle.Secondary)
+                .Build();
+        });
+    }
+
+    public async Task RemovePlayerDuringGame(SocketMessageComponent context)
+    {
+        var player = _players.Single(x => x.SocketUser.Id == context.User.Id);
+        _players.Remove(player);
+
+        await CheckForWinner();
+    }
+
+    public async Task CancelPlayerWild(SocketMessageComponent context)
+    {
+        var player = _players.Single(x => x.SocketUser.Id == context.User.Id);
+
+        await player.UpdateCardMenu(context, DiscardPile!.Peek(), _lastCardColor,
+            _players[_playerIndex].SocketUser.Id == player.SocketUser.Id);
     }
 }

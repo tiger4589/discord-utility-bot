@@ -42,7 +42,7 @@ public class UnoManager : IUnoManager
         await Logger.Log($"Loaded {unoConfigurations.Count} uno configurations");
     }
 
-    public async Task EnableUnoInChannel(SocketInteractionContext context, IChannel channel)
+    public async Task EnableUnoInChannel(SocketInteractionContext context, IChannel channel, IRole role)
     {
         var allUnoConfigurations = _cacheManager.GetAllUnoConfigurations();
 
@@ -53,8 +53,8 @@ public class UnoManager : IUnoManager
             return;
         }
 
-        await _unoConfigurationService.AddUnoConfiguration(channel.Id);
-        _cacheManager.AddUnoConfiguration(channel.Id);
+        await _unoConfigurationService.AddUnoConfiguration(channel.Id, role.Id);
+        _cacheManager.AddUnoConfiguration(channel.Id, role.Id);
 
         await context.Interaction.ModifyOriginalResponseAsync(prop =>
             prop.Content = $"#{channel.Name} is now configured to accept uno games!");

@@ -14,4 +14,7 @@ public interface IUnoGameManager
     Task PlayCard(SocketInteractionContext context, Guid cardId);
     Task DrawCard(SocketInteractionContext context);
     Task PlayWildCard(SocketInteractionContext context, string color, Guid cardId);
+    Task LeaveGame(SocketMessageComponent contextInteraction, Guid gameId);
+    Task LeaveDuringGame(SocketMessageComponent contextInteraction, Guid parse);
+    Task CancelWild(SocketMessageComponent contextInteraction, Guid parse);
 }
