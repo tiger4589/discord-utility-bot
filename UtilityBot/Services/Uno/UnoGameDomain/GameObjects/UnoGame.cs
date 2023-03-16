@@ -1,7 +1,9 @@
 ﻿using System.Text;
 using Discord;
 using Discord.Interactions;
+using Discord.Rest;
 using Discord.WebSocket;
+using UtilityBot.Services.CacheService;
 using UtilityBot.Services.Uno.UnoGameDomain.GameAssets;
 using Timer = System.Timers.Timer;
 
@@ -9,7 +11,6 @@ namespace UtilityBot.Services.Uno.UnoGameDomain.GameObjects;
 
 public class UnoGame
 {
-
     public Queue<Card>? Deck { get; set; }
     public Stack<Card>? DiscardPile { get; set; }
 
@@ -22,10 +23,13 @@ public class UnoGame
 
     private readonly IList<Player> _players = new List<Player>();
     private SocketInteraction _socketInteraction;
+    private readonly DiscordSocketClient _client;
+    private readonly ICacheManager _cacheManager;
+    private RestFollowupMessage? _followupMessage;
 
-    private int _playerIndex = 0;
-    private int _turn = 0;
-    private bool _isReversed = false;
+    private int _playerIndex;
+    private int _turn;
+    private bool _isReversed;
     private readonly Random _random = new();
 
     private bool _isGameOver;
@@ -34,13 +38,81 @@ public class UnoGame
 
     public int NumberOfPlayers => _players.Count;
 
-    public UnoGame(ulong channelId, Player host, SocketInteraction socketInteraction)
+    public UnoGame(ulong channelId, Player host, SocketInteraction socketInteraction, DiscordSocketClient client, ICacheManager cacheManager)
     {
         _socketInteraction = socketInteraction;
+        _client = client;
+        _cacheManager = cacheManager;
         ChannelId = channelId;
         Host = host;
         _players.Add(host);
         Id = Guid.NewGuid();
+        _client.MessageReceived -= ClientOnMessageReceived;
+        _client.MessageReceived += ClientOnMessageReceived;
+    }
+
+    private readonly IList<string> _messages = new List<string>();
+
+    private async Task ClientOnMessageReceived(SocketMessage arg)
+    {
+        if (arg.Author.IsBot)
+        {
+            return;
+        }
+
+        if (IsGameOver)
+        {
+            return;
+        }
+
+        if (!HasStarted)
+        {
+            return;
+        }
+
+        if (arg.Channel.Id != ChannelId)
+        {
+            return;
+        }
+
+        string message = $"{arg.Author.Mention} said: {arg.Content}";
+        _cacheManager.AddDeletedMessageByBot(arg.Id);
+        await arg.DeleteAsync();
+        await AppendAndSendMessage(message);
+    }
+
+    private async Task AppendAndSendMessage(string message)
+    {
+        if (_messages.Count >= 10)
+        {
+            _messages.RemoveAt(0);
+        }
+
+        if (!message.EndsWith(Environment.NewLine))
+            message = string.Concat(message, Environment.NewLine);
+
+        _messages.Add(message);
+
+        await UpdateLogMessage();
+    }
+
+    private async Task UpdateLogMessage()
+    {
+        await _socketInteraction.ModifyOriginalResponseAsync(m =>
+        {
+            m.Embed = new EmbedBuilder()
+                .WithColor(DiscardPile!.Peek().GetDiscordColor())
+                .WithAuthor(new EmbedAuthorBuilder()
+                    .WithName("Logs")
+                    .WithIconUrl(_client.CurrentUser.GetAvatarUrl() ?? _client.CurrentUser.GetDefaultAvatarUrl()))
+                .WithDescription($"{string.Join("", _messages)}")
+                .Build();
+        });
+    }
+
+    public void SaveFollowupMessage(RestFollowupMessage? followupMessage)
+    {
+        _followupMessage = followupMessage;
     }
 
     private void ShuffleDeck()
@@ -48,7 +120,7 @@ public class UnoGame
         Deck ??= new Queue<Card>();
 
         var cards = OrganizedDeck.GetDeck();
-        var shuffledCards = cards.OrderBy(x => Guid.NewGuid()).ToList();
+        var shuffledCards = cards.OrderBy(_ => Guid.NewGuid()).ToList();
         foreach (var card in shuffledCards)
         {
             Deck.Enqueue(card);
@@ -99,14 +171,13 @@ public class UnoGame
         });
     }
 
-    public async Task StartGame(SocketInteractionContext context)
+    public async Task StartGame()
     {
         HasStarted = true;
         ShuffleDeck();
         DistributeCards();
-        var firstCard = DrawFirstCard();
+        DrawFirstCard();
         _playerIndex = _random.Next(0, NumberOfPlayers);
-        _socketInteraction = context.Interaction;
         await DoTurn(false);
     }
 
@@ -141,7 +212,7 @@ public class UnoGame
             sb.AppendLine($"Top card is {playedCard}");
         }
 
-        Player? currentPlayer = null;
+        Player? currentPlayer;
         Player? nextPlayer = null;
 
         if (playedCard.Special == ESpecial.Skip)
@@ -249,7 +320,7 @@ public class UnoGame
         {
             if (nextPlayer != null)
             {
-                await currentPlayer.UpdateCardMenu(null, DiscardPile!.Peek(), _lastCardColor, false);
+                await currentPlayer.UpdateCardMenu(null, DiscardPile!.Peek(), _lastCardColor);
                 await nextPlayer.UpdateCardMenu(null, DiscardPile!.Peek(), _lastCardColor, true);
             }
             else
@@ -263,73 +334,190 @@ public class UnoGame
             await currentPlayer.UpdateCardMenu(null, DiscardPile!.Peek(), _lastCardColor, true);
         }
 
-        if (_timer is { Enabled: true })
+        if (_inactiveTimer is { Enabled: true })
         {
-            _timer.Stop();
+            _inactiveTimer.Stop();
         }
 
-        _timer = new Timer(2 * 60 * 1000);
-        _timer.Elapsed += async (sender, args) => await RemoveInactivePlayer(nextPlayer);
-        _timer.AutoReset = false;
-        _timer.Enabled = true;
-
-        var initialCommand = (SocketMessageComponent)_socketInteraction;
-
-        if (_turn == 1)
+        if (_pingTimer is { Enabled: true })
         {
-            await initialCommand.UpdateAsync(m =>
-            {
-                m.Embed = new EmbedBuilder()
-                    .WithColor(DiscardPile!.Peek().GetDiscordColor())
-                    .WithAuthor(new EmbedAuthorBuilder()
-                        .WithName($"{nextPlayer!.SocketUser.Username}'s Turn - Round #{_turn}")
-                        .WithIconUrl(nextPlayer.SocketUser.GetAvatarUrl() ?? nextPlayer.SocketUser.GetDefaultAvatarUrl()))
-                    .WithDescription($"{sb}")
-                    .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl(_lastCardColor))
-                    .WithFields(new EmbedFieldBuilder()
-                    {
-                        Name = $"Players {(_isReversed ? "🔃" : "")}",
-                        Value = ListPlayers(true),
-                    })
-                    .Build();
+            _pingTimer.Stop();
+        }
 
-                m.Components = new ComponentBuilder()
-                    .WithButton("View Cards", $"show-card-prompt", row: 0, style: ButtonStyle.Secondary)
-                    .WithButton("Leave Game", $"leave-during-game_{Id}", row: 0, style: ButtonStyle.Secondary)
-                    .Build();
-            });
+        _inactiveTimer = new Timer(1 * 60 * 1000);
+        _inactiveTimer.Elapsed += async (_, _) => await RemoveInactivePlayer(nextPlayer);
+        _inactiveTimer.AutoReset = false;
+        _inactiveTimer.Enabled = true;
+
+        _pingTimer = new Timer(1 * 30 * 1000);
+        _pingTimer.Elapsed += async (_, _) => await PingInactivePlayer(nextPlayer);
+        _pingTimer.AutoReset = false;
+        _pingTimer.Enabled = true;
+
+        var initialCommand = _followupMessage;
+
+        //if (_turn == 1)
+        //{
+        //    await initialCommand.UpdateAsync(m =>
+        //    {
+        //        m.Embed = new EmbedBuilder()
+        //            .WithColor(DiscardPile!.Peek().GetDiscordColor())
+        //            .WithAuthor(new EmbedAuthorBuilder()
+        //                .WithName($"{nextPlayer!.SocketUser.Username}'s Turn - Round #{_turn}")
+        //                .WithIconUrl(nextPlayer.SocketUser.GetAvatarUrl() ?? nextPlayer.SocketUser.GetDefaultAvatarUrl()))
+        //            .WithDescription($"{sb}")
+        //            .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl(_lastCardColor))
+        //            .WithFields(new EmbedFieldBuilder()
+        //            {
+        //                Name = $"Players {(_isReversed ? "🔃" : "")}",
+        //                Value = ListPlayers(true),
+        //            })
+        //            .Build();
+
+        //        m.Components = new ComponentBuilder()
+        //            .WithButton("View Cards", $"show-card-prompt", row: 0, style: ButtonStyle.Secondary)
+        //            .WithButton("Leave Game", $"leave-during-game_{Id}", row: 0, style: ButtonStyle.Secondary)
+        //            .Build();
+        //    });
+        //}
+        //  else
+        //  {
+        await initialCommand!.ModifyAsync(m =>
+        {
+            m.Embed = new EmbedBuilder()
+                .WithColor(DiscardPile!.Peek().GetDiscordColor())
+                .WithAuthor(new EmbedAuthorBuilder()
+                    .WithName($"{nextPlayer.SocketUser.Username}'s Turn - Round #{_turn}")
+                    .WithIconUrl(nextPlayer.SocketUser.GetAvatarUrl() ?? nextPlayer.SocketUser.GetDefaultAvatarUrl()))
+                .WithDescription($"{sb}")
+                .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl(_lastCardColor))
+                .WithFields(new EmbedFieldBuilder()
+                {
+                    Name = $"Players {(_isReversed ? "🔃" : "")}",
+                    Value = ListPlayers(true),
+                })
+                .Build();
+
+            m.Components = new ComponentBuilder()
+                .WithButton("View Cards", $"show-card-prompt", row: 0, style: ButtonStyle.Secondary)
+                .WithButton("Leave Game", $"leave-during-game_{Id}", row: 0, style: ButtonStyle.Secondary)
+                .Build();
+        });
+
+        await AppendAndSendMessage(sb.ToString());
+        //   }
+    }
+
+    private Timer? _inactiveTimer;
+    private Timer? _pingTimer;
+
+    public async Task RemovePlayerDuringGame(SocketMessageComponent context)
+    {
+        var player = _players.Single(x => x.SocketUser.Id == context.User.Id);
+        StringBuilder sb = new StringBuilder();
+
+        foreach (var card in player.Hand!)
+        {
+            Deck!.Enqueue(card);
+        }
+
+        _players.Remove(player);
+        sb.AppendLine($"{player.SocketUser.Mention} decided to leave the game.");
+        
+        await CheckForWinner();
+    }
+
+    private async Task RemoveInactivePlayer(Player player)
+    {
+        StringBuilder sb = new StringBuilder();
+        //add back cards to deck!
+        foreach (var card in player.Hand!)
+        {
+            Deck!.Enqueue(card);
+        }
+
+        //need to fix the index as well as removing the player.. removing alone ain't good
+        _players.Remove(player);
+        sb.AppendLine($"{player.SocketUser.Mention} has been kicked about after 1 minute of inactivity.");
+
+        await CheckForWinner();
+        if (_isGameOver)
+        {
+            return;
+        }
+
+        if (_isReversed)
+        {
+            _playerIndex--;
+            if (_playerIndex < 0)
+                _playerIndex = NumberOfPlayers - 1;
         }
         else
         {
-            await initialCommand.Message.ModifyAsync(m =>
-            {
-                m.Embed = new EmbedBuilder()
-                    .WithColor(DiscardPile!.Peek().GetDiscordColor())
-                    .WithAuthor(new EmbedAuthorBuilder()
-                        .WithName($"{nextPlayer!.SocketUser.Username}'s Turn - Round #{_turn}")
-                        .WithIconUrl(nextPlayer.SocketUser.GetAvatarUrl() ?? nextPlayer.SocketUser.GetDefaultAvatarUrl()))
-                    .WithDescription($"{sb}")
-                    .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl(_lastCardColor))
-                    .WithFields(new EmbedFieldBuilder()
-                    {
-                        Name = $"Players {(_isReversed ? "🔃" : "")}",
-                        Value = ListPlayers(true),
-                    })
-                    .Build();
-
-                m.Components = new ComponentBuilder()
-                    .WithButton("View Cards", $"show-card-prompt", row: 0, style: ButtonStyle.Secondary)
-                    .WithButton("Leave Game", $"leave-during-game_{Id}", row: 0, style: ButtonStyle.Secondary)
-                    .Build();
-            });
+            if (_playerIndex >= NumberOfPlayers)
+                _playerIndex = 0;
         }
+
+        var newPlayer = _players[_playerIndex];
+        await newPlayer.UpdateCardMenu(null, DiscardPile!.Peek(), _lastCardColor, true);
+        var userMessage = await _followupMessage!.Channel.SendMessageAsync($"{newPlayer.SocketUser.Mention} - Previous Player Skipped His Turn - You have 60 seconds to play.");
+        await Task.Delay(3000);
+        await userMessage.DeleteAsync();
+
+        if (_inactiveTimer is { Enabled: true })
+        {
+            _inactiveTimer.Stop();
+        }
+
+        if (_pingTimer is { Enabled: true })
+        {
+            _pingTimer.Stop();
+        }
+
+        _inactiveTimer = new Timer(1 * 60 * 1000);
+        _inactiveTimer.Elapsed += async (_, _) => await RemoveInactivePlayer(newPlayer);
+        _inactiveTimer.AutoReset = false;
+        _inactiveTimer.Enabled = true;
+
+        _pingTimer = new Timer(1 * 30 * 1000);
+        _pingTimer.Elapsed += async (_, _) => await PingInactivePlayer(newPlayer);
+        _pingTimer.AutoReset = false;
+        _pingTimer.Enabled = true;
+
+        var initialCommand = _followupMessage;
+
+        sb.AppendLine($"Top card is {DiscardPile!.Peek()}");
+
+        await initialCommand!.ModifyAsync(m =>
+        {
+            m.Embed = new EmbedBuilder()
+                .WithColor(DiscardPile!.Peek().GetDiscordColor())
+                .WithAuthor(new EmbedAuthorBuilder()
+                    .WithName($"{newPlayer.SocketUser.Username}'s Turn - Round #{_turn}")
+                    .WithIconUrl(newPlayer.SocketUser.GetAvatarUrl() ?? newPlayer.SocketUser.GetDefaultAvatarUrl()))
+                .WithDescription($"{sb}")
+                .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl(_lastCardColor))
+                .WithFields(new EmbedFieldBuilder()
+                {
+                    Name = $"Players {(_isReversed ? "🔃" : "")}",
+                    Value = ListPlayers(true),
+                })
+                .Build();
+
+            m.Components = new ComponentBuilder()
+                .WithButton("View Cards", $"show-card-prompt", row: 0, style: ButtonStyle.Secondary)
+                .WithButton("Leave Game", $"leave-during-game_{Id}", row: 0, style: ButtonStyle.Secondary)
+                .Build();
+        });
+
+        await AppendAndSendMessage(sb.ToString());
     }
 
-    private Timer? _timer;
-    private async Task RemoveInactivePlayer(Player player)
+    private async Task PingInactivePlayer(Player player)
     {
-        _players.Remove(player);
-        await DoTurn(false);
+        var userMessage = await _followupMessage!.Channel.SendMessageAsync($"{player.SocketUser.Mention} - You have 30 seconds to play.");
+        await Task.Delay(3000);
+        await userMessage.DeleteAsync();
     }
 
     private async Task CheckForWinner()
@@ -348,8 +536,18 @@ public class UnoGame
 
         if (_isGameOver)
         {
-            var initialCommand = (SocketMessageComponent)_socketInteraction;
-            await initialCommand.Message.ModifyAsync(m =>
+            if (_inactiveTimer is { Enabled: true })
+            {
+                _inactiveTimer.Stop();
+            }
+
+            if (_pingTimer is { Enabled: true })
+            {
+                _pingTimer.Stop();
+            }
+
+            var initialCommand = _followupMessage;
+            await initialCommand!.ModifyAsync(m =>
             {
                 m.Content = "The game is over, I hope you had fun 😊";
 
@@ -370,7 +568,7 @@ public class UnoGame
         }
     }
 
-    private Card DrawFirstCard()
+    private void DrawFirstCard()
     {
         DiscardPile ??= new Stack<Card>();
         var firstCard = Deck!.Dequeue();
@@ -382,7 +580,6 @@ public class UnoGame
         }
 
         DiscardPile.Push(firstCard);
-        return firstCard;
     }
 
     private void NextPlayerIndex()
@@ -416,7 +613,7 @@ public class UnoGame
 
             DiscardPile!.Push(tempCard);
 
-            discardedCards = discardedCards.OrderBy(x => Guid.NewGuid()).ToList();
+            discardedCards = discardedCards.OrderBy(_ => Guid.NewGuid()).ToList();
             foreach (var discardedCard in discardedCards)
             {
                 Deck!.Enqueue(discardedCard);
@@ -492,7 +689,7 @@ public class UnoGame
                 });
                 return;
             }
-            
+
             await command.UpdateAsync(m =>
             {
                 m.Embed = new EmbedBuilder()
@@ -569,57 +766,32 @@ public class UnoGame
 
         _turn++;
 
-        var initialCommand = (SocketMessageComponent)_socketInteraction;
+        var initialCommand = _followupMessage;
 
-
-        if (_turn == 1)
+        await initialCommand!.ModifyAsync(m =>
         {
-            await initialCommand.UpdateAsync(m =>
-            {
-                m.Embed = new EmbedBuilder()
-                    .WithColor(DiscardPile!.Peek().GetDiscordColor())
-                    .WithAuthor(new EmbedAuthorBuilder()
-                        .WithName($"{nextPlayer!.SocketUser.Username}'s Turn - Round #{_turn}")
-                        .WithIconUrl(nextPlayer.SocketUser.GetAvatarUrl() ?? nextPlayer.SocketUser.GetDefaultAvatarUrl()))
-                    .WithDescription($"{potentialPlayer.SocketUser.Mention} drew 1 card and lost his turn!{Environment.NewLine}Top card is {DiscardPile!.Peek()}")
-                    .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl(_lastCardColor))
-                    .WithFields(new EmbedFieldBuilder()
-                    {
-                        Name = $"Players {(_isReversed ? "🔃" : "")}",
-                        Value = ListPlayers(true),
-                    })
-                    .Build();
+            m.Embed = new EmbedBuilder()
+                .WithColor(DiscardPile!.Peek().GetDiscordColor())
+                .WithAuthor(new EmbedAuthorBuilder()
+                    .WithName($"{nextPlayer.SocketUser.Username}'s Turn - Round #{_turn}")
+                    .WithIconUrl(nextPlayer.SocketUser.GetAvatarUrl() ?? nextPlayer.SocketUser.GetDefaultAvatarUrl()))
+                .WithDescription($"{potentialPlayer.SocketUser.Mention} drew 1 card and lost his turn!{Environment.NewLine}Top card is {DiscardPile!.Peek()}")
+                .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl(_lastCardColor))
+                .WithFields(new EmbedFieldBuilder()
+                {
+                    Name = $"Players {(_isReversed ? "🔃" : "")}",
+                    Value = ListPlayers(true),
+                })
+                .Build();
 
-                m.Components = new ComponentBuilder()
-                    .WithButton("View Cards", $"show-card-prompt", row: 0, style: ButtonStyle.Secondary)
-                    .WithButton("Leave Game", $"leave-during-game_{Id}", row: 0, style: ButtonStyle.Secondary)
-                    .Build();
-            });
-        }
-        else
-        {
-            await initialCommand.Message.ModifyAsync(m =>
-            {
-                m.Embed = new EmbedBuilder()
-                    .WithColor(DiscardPile!.Peek().GetDiscordColor())
-                    .WithAuthor(new EmbedAuthorBuilder()
-                        .WithName($"{nextPlayer!.SocketUser.Username}'s Turn - Round #{_turn}")
-                        .WithIconUrl(nextPlayer.SocketUser.GetAvatarUrl() ?? nextPlayer.SocketUser.GetDefaultAvatarUrl()))
-                    .WithDescription($"{potentialPlayer.SocketUser.Mention} drew 1 card and lost his turn!{Environment.NewLine}Top card is {DiscardPile!.Peek()}")
-                    .WithThumbnailUrl(DiscardPile!.Peek().GetImageUrl(_lastCardColor))
-                    .WithFields(new EmbedFieldBuilder()
-                    {
-                        Name = $"Players {(_isReversed ? "🔃" : "")}",
-                        Value = ListPlayers(true),
-                    })
-                    .Build();
+            m.Components = new ComponentBuilder()
+                .WithButton("View Cards", $"show-card-prompt", row: 0, style: ButtonStyle.Secondary)
+                .WithButton("Leave Game", $"leave-during-game_{Id}", row: 0, style: ButtonStyle.Secondary)
+                .Build();
+        });
 
-                m.Components = new ComponentBuilder()
-                    .WithButton("View Cards", $"show-card-prompt", row: 0, style: ButtonStyle.Secondary)
-                    .WithButton("Leave Game", $"leave-during-game_{Id}", row: 0, style: ButtonStyle.Secondary)
-                    .Build();
-            });
-        }
+        await AppendAndSendMessage(
+            $"{potentialPlayer.SocketUser.Mention} drew 1 card and lost his turn!{Environment.NewLine}Top card is {DiscardPile!.Peek()}");
     }
 
     public async Task PlayWildCard(SocketInteractionContext context, Guid cardId, EColor color)
@@ -730,14 +902,6 @@ public class UnoGame
                 .WithButton("Leave Game", $"leave-uno_{Id}", row: 1, style: ButtonStyle.Secondary)
                 .Build();
         });
-    }
-
-    public async Task RemovePlayerDuringGame(SocketMessageComponent context)
-    {
-        var player = _players.Single(x => x.SocketUser.Id == context.User.Id);
-        _players.Remove(player);
-
-        await CheckForWinner();
     }
 
     public async Task CancelPlayerWild(SocketMessageComponent context)

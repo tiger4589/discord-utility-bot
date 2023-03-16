@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using System.Text;
+using Discord;
 using Discord.Interactions;
 using Discord.Rest;
 using Discord.WebSocket;
@@ -63,23 +64,35 @@ public class UnoGameManager : IUnoGameManager
         var game = new UnoGame(context.Channel.Id, new Player
         {
             SocketUser = context.User
-        }, context.Interaction);
+        }, context.Interaction, context.Client, _cacheManager);
 
         _runningGames.Add(game);
 
         _startTime = DateTimeOffset.Now.Add(TimeSpan.FromMinutes(5));
 
-        var message = await context.Interaction.FollowupAsync("Started a new game", embed: new EmbedBuilder()
+        StringBuilder sb = new StringBuilder();
+
+        ulong? roleIdForChannel = _cacheManager.GetRoleIdForChannel(context.Channel.Id);
+        if (roleIdForChannel != null)
+        {
+            var role = context.Guild.GetRole(roleIdForChannel.Value);
+            sb.AppendLine(role.Mention);
+        }
+
+        sb.AppendLine("Initialized a new game!");
+        var message = await context.Interaction.FollowupAsync(sb.ToString(), allowedMentions: AllowedMentions.All, embed: new EmbedBuilder()
                 .WithColor(Colors.Red)
                 .WithAuthor(new EmbedAuthorBuilder()
                     .WithName("UNO"))
-                .WithDescription($"{context.User.Username} has started a game of UNO! Click the button below to join!\n\nCurrent Players:\n{game.ListPlayers(listCardCount: false)}{Environment.NewLine}Game will end automatically <t:{_startTime.Value.ToUnixTimeSeconds()}:R> if not started.")
+                .WithDescription($"{context.User.Username} has initialized a game of UNO! Click the button below to join!\n\nCurrent Players:\n{game.ListPlayers(listCardCount: false)}{Environment.NewLine}Game will end automatically <t:{_startTime.Value.ToUnixTimeSeconds()}:R> if not started.")
                 .Build(),
             components: new ComponentBuilder()
                 .WithButton("Start Game", $"start-uno_{game.Id}", row: 0, style: ButtonStyle.Secondary, disabled: true)
                 .WithButton("Join Game", $"join-uno_{game.Id}", row: 1, style: ButtonStyle.Secondary)
                 .WithButton("Leave Game", $"leave-uno_{game.Id}", row: 1, style: ButtonStyle.Secondary)
                 .Build());
+
+        game.SaveFollowupMessage(message);
 
         _timer = new Timer(5*60*1000);
         _timer.Elapsed += async (sender, args) =>
@@ -211,7 +224,7 @@ public class UnoGameManager : IUnoGameManager
             return;
         }
 
-        await game.StartGame(context);
+        await game.StartGame();
 
         if (_timer is { Enabled: true })
         {

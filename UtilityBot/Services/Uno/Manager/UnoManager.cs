@@ -36,7 +36,7 @@ public class UnoManager : IUnoManager
 
         foreach (var unoConfiguration in unoConfigurations)
         {
-            _cacheManager.AddUnoConfiguration(unoConfiguration.ChannelId);
+            _cacheManager.AddUnoConfiguration(unoConfiguration.ChannelId, unoConfiguration.RoleId);
         }
 
         await Logger.Log($"Loaded {unoConfigurations.Count} uno configurations");

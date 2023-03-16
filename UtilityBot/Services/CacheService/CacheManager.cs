@@ -496,7 +496,7 @@ public class CacheManager : ICacheManager
 
     public ulong? GetRoleIdForChannel(ulong channelId)
     {
-        var value = _unoRoleConfiguration[$"{channelId}"];
+        var value = _unoRoleConfiguration[channelId];
         if (value == null)
         {
             return null;

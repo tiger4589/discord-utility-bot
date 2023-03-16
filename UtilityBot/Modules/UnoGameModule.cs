@@ -25,6 +25,7 @@ public class UnoGameModule : InteractionModuleBase<SocketInteractionContext>
     [ComponentInteraction("start-uno_*")]
     public async Task StartUno(string gameId)
     {
+        await RespondAsync($"Starting...", ephemeral: true);
         await _unoGameManager.StartGame(Context, Guid.Parse(gameId));
     }
 
