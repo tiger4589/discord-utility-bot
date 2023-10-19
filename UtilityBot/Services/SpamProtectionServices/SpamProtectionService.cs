@@ -41,7 +41,6 @@ public class SpamProtectionService : ISpamProtectionService
 
     private async Task ClientOnMessageReceived(SocketMessage arg)
     {
-
         if (arg.Author.IsBot)
         {
             return;

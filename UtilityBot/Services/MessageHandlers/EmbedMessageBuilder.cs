@@ -8,7 +8,7 @@ namespace UtilityBot.Services.MessageHandlers;
 
 public class EmbedMessageBuilder : IEmbedMessageBuilder
 {
-    public Embed BuildVerificationEmbed(SocketUser user, string recruitLink)
+    public Embed BuildVerificationEmbed(SocketUser user, string recruitLink, string parsedInGameUsername)
     {
         var builder = CreateBuilder();
         builder.WithTitle($"Verification Request for {user.Username}");
@@ -17,6 +17,8 @@ public class EmbedMessageBuilder : IEmbedMessageBuilder
         var sb = new StringBuilder();
         sb.AppendLine($"{user.Mention} - ({user.Username})");
         sb.AppendLine(recruitLink);
+
+        sb.AppendLine($"In Game Username: {parsedInGameUsername}");
 
         builder.WithDescription(sb.ToString());
         return builder.Build();

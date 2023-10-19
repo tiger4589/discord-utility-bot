@@ -2,6 +2,7 @@
 using Discord;
 using Discord.Interactions;
 using UtilityBot.Services.CacheService;
+using UtilityBot.Services.PlayerServices;
 
 namespace UtilityBot.Modules;
 
@@ -9,10 +10,12 @@ namespace UtilityBot.Modules;
 public class ModeratorModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly ICacheManager _cacheManager;
+    private readonly IPlayerService _playerService;
 
-    public ModeratorModule(ICacheManager cacheManager)
+    public ModeratorModule(ICacheManager cacheManager, IPlayerService playerService)
     {
         _cacheManager = cacheManager;
+        _playerService = playerService;
     }
 
     [SlashCommand("send-verify-message", "Send the verify message to unverified players")]
@@ -34,5 +37,11 @@ public class ModeratorModule : InteractionModuleBase<SocketInteractionContext>
         await Context.Channel.SendMessageAsync(sb.ToString());
 
         await RespondAsync("Done!", ephemeral: true);
+    }
+
+    [SlashCommand("reset-role", "Reset a specific role for a user")]
+    public async Task ResetRole(IUser user, IRole role)
+    {
+        await _playerService.ResetRole(Context, user.Id, role.Id);
     }
 }

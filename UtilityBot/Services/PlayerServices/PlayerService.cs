@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using HtmlAgilityPack;
+using UtilityBot.EventArguments;
 using UtilityBot.Services.CacheService;
 using UtilityBot.Services.LoggingServices;
 using UtilityBot.Services.MessageHandlers;
@@ -54,7 +56,9 @@ public class PlayerService : IPlayerService
             return;
         }
 
-        var embed  = _embedMessageBuilder.BuildVerificationEmbed(context.User, recruitLink);
+        var inGameUsername = await GetPlayerInGameName(recruitLink);
+
+        var embed  = _embedMessageBuilder.BuildVerificationEmbed(context.User, recruitLink, inGameUsername);
 
         await channel.SendMessageAsync(
             embed: embed,   
@@ -112,5 +116,56 @@ public class PlayerService : IPlayerService
                 .Build());
 
         await context.Interaction.RespondAsync("Moderators have been notified, please be patient.", ephemeral: true);
+    }
+
+    public async Task ResetRole(SocketInteractionContext context, ulong userId, ulong roleId)
+    {
+        var myRoles = context.Guild.CurrentUser.Roles;
+        var socketRole = context.Guild.GetRole(roleId);
+
+        if (myRoles.All(x => x.Position <= socketRole.Position))
+        {
+            await context.Interaction.RespondAsync($"I am not allowed to remove or add {socketRole.Mention} role", ephemeral: true);
+            return;
+        }
+
+        var user = context.Guild.Users.SingleOrDefault(x=>x.Id == userId);
+
+        if (user == null)
+        {
+            await context.Interaction.RespondAsync($"can't find that user!", ephemeral: true);
+            return;
+        }
+
+        var role = user.Roles.SingleOrDefault(x => x.Id == roleId);
+
+        if (role == null)
+        {
+            await context.Interaction.RespondAsync($"{user.Mention} doesn't have {socketRole.Mention} role", ephemeral: true);
+            return;
+        }
+
+        await user.RemoveRoleAsync(roleId);
+        await user.AddRoleAsync(roleId);
+
+        await context.Interaction.RespondAsync($"{socketRole.Mention} role removed and added for {user.Mention}", ephemeral: true);
+    }
+
+    private async Task<string> GetPlayerInGameName(string recruitLink)
+    {
+        using var client = new HttpClient();
+        var htmlPage = await client.GetStringAsync(recruitLink);
+
+        HtmlDocument htmlDoc = new HtmlDocument();
+        htmlDoc.LoadHtml(htmlPage);
+
+        var userNameNodes = 
+            htmlDoc.DocumentNode.Descendants("h2")
+                .Where(node => node.InnerText.Contains("needs your help becoming"))
+            .ToList();
+
+        var userName = userNameNodes.First().InnerText.Replace("Your friend ", "").Replace(" needs your help becoming a King of Chaos!CHOOSE A RACE AND JOIN THE WAR NOW!", "");
+
+        return userName;
     }
 }

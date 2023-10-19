@@ -6,4 +6,5 @@ public interface IPlayerService
 {
     Task RequestVerification(SocketInteractionContext context, string recruitLink);
     Task RequestCoderStatus(SocketInteractionContext context, string recruitLink, string allianceGameLink, string role);
+    Task ResetRole(SocketInteractionContext context, ulong userId, ulong roleId);
 }

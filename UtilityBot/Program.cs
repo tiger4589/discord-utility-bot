@@ -16,6 +16,7 @@ using UtilityBot.Services.GuildJoinedServices.Interfaces;
 using UtilityBot.Services.GuildJoinedServices.Managers;
 using UtilityBot.Services.InteractionServiceManager;
 using UtilityBot.Services.JokesServices;
+using UtilityBot.Services.KoCMemesServices;
 using UtilityBot.Services.LoggingServices;
 using UtilityBot.Services.MagicEightBall;
 using UtilityBot.Services.MessageHandlers;
@@ -88,6 +89,7 @@ IServiceProvider BuildServiceProvider() => new ServiceCollection()
     .AddSingleton<IUnoConfigurationService, UnoConfigurationService>()
     .AddSingleton<IUnoManager, UnoManager>()
     .AddSingleton<IUnoGameManager, UnoGameManager>()
+    .AddSingleton<IKoCMemeService, KoCMemeService>()
     .BuildServiceProvider();
 
 void InitializeMainComponents()
@@ -105,5 +107,6 @@ void InitializeMainComponents()
     serviceProvider.GetRequiredService<ISpamProtectionService>();
     serviceProvider.GetRequiredService<IMagicEightBall>();
     serviceProvider.GetRequiredService<IUnoManager>();
+    serviceProvider.GetRequiredService<IKoCMemeService>();
 }
 
