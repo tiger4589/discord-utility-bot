@@ -452,17 +452,17 @@ public class ConfigurationModule : InteractionModuleBase<SocketInteractionContex
         }
 
         [SlashCommand("enable", "Enable magic eight ball response")]
-        public async Task Enable()
+        public async Task Enable(ITextChannel channel)
         {
             await RespondAsync("Enabling...");
-            _ = _magicEightBall.Enable(Context);
+            _ = _magicEightBall.Enable(Context, channel);
         }
 
         [SlashCommand("disable", "Disable magic eight ball response")]
-        public async Task Disable()
+        public async Task Disable(ITextChannel channel)
         {
             await RespondAsync("Disabling...");
-            _ = _magicEightBall.Disable(Context);
+            _ = _magicEightBall.Disable(Context, channel);
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using UtilityBot.Contracts;
 using UtilityBot.Domain.Database;
 using UtilityBot.Domain.DomainObjects;
 using UtilityBot.Domain.Services.ConfigurationService.Interfaces;
@@ -16,46 +17,71 @@ public class MagicEightBallService : IMagicEightBallService
 
     public async Task AddConfiguration(MagicEightBallConfiguration configuration)
     {
+        var magicEightBallConfiguration = await _context.MagicEightBallConfigurations!.SingleOrDefaultAsync(x => x.ChannelId == configuration.ChannelId);
+        if (magicEightBallConfiguration != null)
+        {
+            if (!magicEightBallConfiguration.IsEnabled)
+            {
+                magicEightBallConfiguration.IsEnabled = true;
+                await _context.SaveChangesAsync();
+            }
+
+            return;
+        }
+
         await _context.MagicEightBallConfigurations!.AddAsync(configuration);
         await _context.SaveChangesAsync();
     }
-
-    public async Task<MagicEightBallConfiguration?> GetLatestConfiguration()
-    {
-        return await _context.MagicEightBallConfigurations!.AsNoTracking().OrderByDescending(x => x.Id)
-            .FirstOrDefaultAsync();
-    }
-
     public async Task AddResponse(MagicEightBallResponse response)
     {
         await _context.MagicEightBallResponses!.AddAsync(response);
         await _context.SaveChangesAsync();
     }
-
     public async Task<IList<MagicEightBallResponse>> GetResponses()
     {
         return await _context.MagicEightBallResponses!.AsNoTracking().ToListAsync();
     }
 
-    public async Task Enable()
+    public async Task<string> Enable(ulong channelId)
     {
-        var magicEightBallConfiguration = await _context.MagicEightBallConfigurations!.OrderByDescending(x => x.Id)
-            .FirstOrDefaultAsync();
-        if (magicEightBallConfiguration != null)
+        var magicEightBallConfiguration = await _context.MagicEightBallConfigurations!.SingleOrDefaultAsync(x => x.ChannelId == channelId);
+
+        if (magicEightBallConfiguration == null)
         {
-            magicEightBallConfiguration.IsEnabled = true;
-            await _context.SaveChangesAsync();
+            return "Magic Eight Ball isn't configured for this channel. Please add the configuration.";
         }
+
+        if (magicEightBallConfiguration.IsEnabled)
+        {
+            return "Magic Eight Ball is already enabled for this channel.";
+        }
+
+        magicEightBallConfiguration.IsEnabled = true;
+        await _context.SaveChangesAsync();
+        return "Magic Eight Ball is now enabled for this channel.";
     }
 
-    public async Task Disable()
+    public async Task<string> Disable(ulong channelId)
     {
-        var magicEightBallConfiguration = await _context.MagicEightBallConfigurations!.OrderByDescending(x => x.Id)
-            .FirstOrDefaultAsync();
-        if (magicEightBallConfiguration != null)
+        var magicEightBallConfiguration = await _context.MagicEightBallConfigurations!.SingleOrDefaultAsync(x => x.ChannelId == channelId);
+
+        if (magicEightBallConfiguration == null)
         {
-            magicEightBallConfiguration.IsEnabled = false;
-            await _context.SaveChangesAsync();
+            return "Magic Eight Ball isn't configured for this channel. No need to disable it, right?";
         }
+
+        if (!magicEightBallConfiguration.IsEnabled)
+        {
+            return "Magic Eight Ball is already disabled for this channel.";
+        }
+
+        magicEightBallConfiguration.IsEnabled = false;
+        await _context.SaveChangesAsync();
+        return "Magic Eight Ball is now disabled for this channel.";
+    }
+
+    public async Task<IEnumerable<MagicEightBallConfiguration>> GetConfigurations()
+    {
+        return await _context.MagicEightBallConfigurations!.AsNoTracking().ToListAsync();
     }
 }

@@ -7,8 +7,8 @@ public interface IMagicEightBall
 {
     Task AddResponse(SocketInteractionContext context, string response);
     Task AddConfiguration(SocketInteractionContext context, IChannel channel);
-    Task Enable(SocketInteractionContext context);
-    Task Disable(SocketInteractionContext context);
+    Task Enable(SocketInteractionContext context, IChannel channel);
+    Task Disable(SocketInteractionContext context, IChannel channel);
 
     Task Answer(SocketInteractionContext context, string question);
 }

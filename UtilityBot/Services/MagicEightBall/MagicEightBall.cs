@@ -26,14 +26,19 @@ public class MagicEightBall : IMagicEightBall
 
     private async Task ClientOnReady()
     {
-        var configuration = await _eightBallService.GetLatestConfiguration();
-        if (configuration == null)
+        var configuration = (await _eightBallService.GetConfigurations()).ToList();
+
+        if (!configuration.Any())
         {
             await Logger.Log("Magic Eight Ball isn't configured");
         }
         else
         {
-            _cacheManager.AddOrUpdate(configuration);
+            foreach (var magicEightBallConfiguration in configuration)
+            {
+                _cacheManager.AddOrUpdate(magicEightBallConfiguration);
+            }
+            
             await Logger.Log("Magic Eight ball configuration loaded");
         }
 
@@ -74,75 +79,92 @@ public class MagicEightBall : IMagicEightBall
             prop.Content = $"Configuration set to reply in #{channel.Name}");
     }
 
-    public async Task Enable(SocketInteractionContext context)
+    public async Task Enable(SocketInteractionContext context, IChannel channel)
     {
         var magicEightBallConfiguration = _cacheManager.GetMagicEightBallConfiguration();
-        if (magicEightBallConfiguration == null)
+        if (magicEightBallConfiguration == null || !magicEightBallConfiguration.Any())
         {
             await context.Interaction.ModifyOriginalResponseAsync(prop =>
                 prop.Content = "Configuration isn't set in first place.");
             return;
         }
 
-        if (magicEightBallConfiguration.IsEnabled)
+        var eightBallConfiguration = magicEightBallConfiguration.SingleOrDefault(x => x.ChannelId == channel.Id);
+        if (eightBallConfiguration == null)
         {
             await context.Interaction.ModifyOriginalResponseAsync(prop =>
-                prop.Content = "Magic Eight Ball is already enabled");
+                               prop.Content = "Configuration isn't set in first place for this channel.");
             return;
         }
 
-        await _eightBallService.Enable();
-        _cacheManager.EnableMagicEightBall();
+        if (eightBallConfiguration.IsEnabled)
+        {
+            await context.Interaction.ModifyOriginalResponseAsync(prop =>
+                prop.Content = "Magic Eight Ball is already enabled for this channel");
+            return;
+        }
+
+        await _eightBallService.Enable(channel.Id);
+        _cacheManager.EnableMagicEightBall(channel.Id);
 
         await context.Interaction.ModifyOriginalResponseAsync(prop =>
-            prop.Content = "Magic Eight has been enabled");
+            prop.Content = "Magic Eight has been enabled for this channel");
     }
 
-    public async Task Disable(SocketInteractionContext context)
+    public async Task Disable(SocketInteractionContext context, IChannel channel)
     {
         var magicEightBallConfiguration = _cacheManager.GetMagicEightBallConfiguration();
-        if (magicEightBallConfiguration == null)
+        if (magicEightBallConfiguration == null || !magicEightBallConfiguration.Any())
         {
             await context.Interaction.ModifyOriginalResponseAsync(prop =>
                 prop.Content = "Configuration isn't set in first place.");
             return;
         }
 
-        if (!magicEightBallConfiguration.IsEnabled)
+        var eightBallConfiguration = magicEightBallConfiguration.SingleOrDefault(x => x.ChannelId == channel.Id);
+        if (eightBallConfiguration == null)
         {
             await context.Interaction.ModifyOriginalResponseAsync(prop =>
-                prop.Content = "Magic Eight Ball is already disabled");
+                prop.Content = "Configuration isn't set in first place for this channel.");
             return;
         }
 
-        await _eightBallService.Disable();
-        _cacheManager.DisableMagicEightBall();
+        if (!eightBallConfiguration.IsEnabled)
+        {
+            await context.Interaction.ModifyOriginalResponseAsync(prop =>
+                prop.Content = "Magic Eight Ball is already disabled for this channel");
+            return;
+        }
+
+        await _eightBallService.Disable(channel.Id);
+        _cacheManager.DisableMagicEightBall(channel.Id);
 
         await context.Interaction.ModifyOriginalResponseAsync(prop =>
-            prop.Content = "Magic Eight has been disabled");
+            prop.Content = "Magic Eight has been disabled for this channel");
     }
 
     public async Task Answer(SocketInteractionContext context, string question)
     {
         var magicEightBallConfiguration = _cacheManager.GetMagicEightBallConfiguration();
-        if (magicEightBallConfiguration == null)
+        if (magicEightBallConfiguration == null || !magicEightBallConfiguration.Any())
         {
             await context.Interaction.ModifyOriginalResponseAsync(prop =>
                 prop.Content = "Magic Eight Ball isn't configured yet");
             return;
         }
 
-        if (!magicEightBallConfiguration.IsEnabled)
+        var conf = magicEightBallConfiguration.SingleOrDefault(x => x.ChannelId == context.Channel.Id);
+        if (conf == null)
         {
             await context.Interaction.ModifyOriginalResponseAsync(prop =>
-                prop.Content = "Magic Eight Ball is currently disabled");
+                prop.Content = "Magic Eight Ball is currently disabled for this channel");
             return;
         }
 
-        if (magicEightBallConfiguration.ChannelId != context.Channel.Id)
+        if (!conf.IsEnabled)
         {
             await context.Interaction.ModifyOriginalResponseAsync(prop =>
-                prop.Content = "This isn't where you can ask me a question!");
+                prop.Content = "Magic Eight Ball is currently disabled for this channel");
             return;
         }
 

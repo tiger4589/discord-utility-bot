@@ -35,11 +35,11 @@ public interface ICacheManager
     CapsProtectionConfiguration? GetCapsProtectionConfiguration();
 
     void AddOrUpdate(MagicEightBallConfiguration configuration);
-    MagicEightBallConfiguration? GetMagicEightBallConfiguration();
+    List<MagicEightBallConfiguration>? GetMagicEightBallConfiguration();
     void Add(MagicEightBallResponse response);
     IList<MagicEightBallResponse> GetMagicEightBallResponses();
-    void EnableMagicEightBall();
-    void DisableMagicEightBall();
+    void EnableMagicEightBall(ulong channelId);
+    void DisableMagicEightBall(ulong channelId);
 
 
     void LoadEventsConfiguration(IList<EventsConfiguration> configurations);

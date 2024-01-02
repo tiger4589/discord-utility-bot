@@ -318,15 +318,21 @@ public class CacheManager : ICacheManager
     {
         if (_8BallConfiguration.ContainsKey("conf"))
         {
-            _8BallConfiguration.Remove("conf");
+            var magicEightBallConfigurations = (List<MagicEightBallConfiguration>)_8BallConfiguration["conf"]!;
+            if (magicEightBallConfigurations.Any(x => x.ChannelId == configuration.ChannelId))
+            {
+                magicEightBallConfigurations.Remove(magicEightBallConfigurations.Single(x => x.ChannelId == configuration.ChannelId));
+            }
+            magicEightBallConfigurations.Add(configuration);
+            return;
         }
 
-        _8BallConfiguration.Add("conf", configuration);
+        _8BallConfiguration.Add("conf", new List<MagicEightBallConfiguration> { configuration });
     }
 
-    public MagicEightBallConfiguration? GetMagicEightBallConfiguration()
+    public List<MagicEightBallConfiguration>? GetMagicEightBallConfiguration()
     {
-        return (MagicEightBallConfiguration?)_8BallConfiguration["conf"];
+        return (List<MagicEightBallConfiguration>?)_8BallConfiguration["conf"];
     }
 
     public void Add(MagicEightBallResponse response)
@@ -349,21 +355,29 @@ public class CacheManager : ICacheManager
         return (List<MagicEightBallResponse>)_8BallConfiguration["msg_conf"]!;
     }
 
-    public void EnableMagicEightBall()
+    public void EnableMagicEightBall(ulong channelId)
     {
         if (_8BallConfiguration.ContainsKey("conf"))
         {
-            MagicEightBallConfiguration conf = (MagicEightBallConfiguration)_8BallConfiguration["conf"]!;
-            conf.IsEnabled = true;
+            List<MagicEightBallConfiguration> conf = (List<MagicEightBallConfiguration>)_8BallConfiguration["conf"]!;
+            var magicEightBallConfiguration = conf.SingleOrDefault(x => x.ChannelId == channelId);
+            if (magicEightBallConfiguration != null)
+            {
+                magicEightBallConfiguration.IsEnabled = true;
+            }
         }
     }
 
-    public void DisableMagicEightBall()
+    public void DisableMagicEightBall(ulong channelId)
     {
         if (_8BallConfiguration.ContainsKey("conf"))
         {
-            MagicEightBallConfiguration conf = (MagicEightBallConfiguration)_8BallConfiguration["conf"]!;
-            conf.IsEnabled = false;
+            List<MagicEightBallConfiguration> conf = (List<MagicEightBallConfiguration>)_8BallConfiguration["conf"]!;
+            var magicEightBallConfiguration = conf.SingleOrDefault(x => x.ChannelId == channelId);
+            if (magicEightBallConfiguration != null)
+            {
+                magicEightBallConfiguration.IsEnabled = false;
+            }
         }
     }
 

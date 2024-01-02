@@ -4,12 +4,10 @@ namespace UtilityBot.Domain.Services.ConfigurationService.Interfaces;
 
 public interface IMagicEightBallService
 {
-    Task AddConfiguration(MagicEightBallConfiguration configuration);
-    Task<MagicEightBallConfiguration?> GetLatestConfiguration();
-
     Task AddResponse(MagicEightBallResponse response);
     Task<IList<MagicEightBallResponse>> GetResponses();
-
-    Task Enable();
-    Task Disable();
+    Task AddConfiguration(MagicEightBallConfiguration configuration);
+    Task<string> Enable(ulong channelId);
+    Task<string> Disable(ulong channelId);
+    Task<IEnumerable<MagicEightBallConfiguration>> GetConfigurations();
 }
