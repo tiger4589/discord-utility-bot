@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilityBot.Domain", "Utilit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilityBot.Api", "UtilityBot.Api\UtilityBot.Api.csproj", "{D4E31645-5A4F-473E-ABDC-796773A36557}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UtilityBot.Casino", "UtilityBot.Casino\UtilityBot.Casino.csproj", "{9C0F91E1-DD1F-4D73-ACB7-0A50F4476B66}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{D4E31645-5A4F-473E-ABDC-796773A36557}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4E31645-5A4F-473E-ABDC-796773A36557}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4E31645-5A4F-473E-ABDC-796773A36557}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C0F91E1-DD1F-4D73-ACB7-0A50F4476B66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C0F91E1-DD1F-4D73-ACB7-0A50F4476B66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C0F91E1-DD1F-4D73-ACB7-0A50F4476B66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C0F91E1-DD1F-4D73-ACB7-0A50F4476B66}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

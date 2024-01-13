@@ -8,8 +8,10 @@
 
   <ItemGroup>
     <Folder Include="Database\" />
+    <Folder Include="DomainObjects\CasinoModels\HorseRaces\" />
     <Folder Include="Mappers\" />
     <Folder Include="Services\ConfigurationService\Services\" />
+    <Folder Include="Services\HorseRaceServices\Models\" />
   </ItemGroup>
 
   <ItemGroup>

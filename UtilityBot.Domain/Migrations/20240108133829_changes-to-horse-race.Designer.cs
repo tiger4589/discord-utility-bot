@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UtilityBot.Domain.Database;
 
@@ -11,9 +12,11 @@ using UtilityBot.Domain.Database;
 namespace UtilityBot.Domain.Migrations
 {
     [DbContext(typeof(UtilityBotContext))]
-    partial class UtilityBotContextModelSnapshot : ModelSnapshot
+    [Migration("20240108133829_changes-to-horse-race")]
+    partial class changestohorserace
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,14 +52,6 @@ namespace UtilityBot.Domain.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AdvantageOn")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DisadvantageOn")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -72,400 +67,300 @@ namespace UtilityBot.Domain.Migrations
                         new
                         {
                             Id = 1,
-                            AdvantageOn = "Nebula",
-                            DisadvantageOn = "Mirage",
                             Name = "Thunderhoof",
                             OddsToOne = 2
                         },
                         new
                         {
                             Id = 2,
-                            AdvantageOn = "Crystal",
-                            DisadvantageOn = "Nebula",
                             Name = "Midnight Mirage",
                             OddsToOne = 3
                         },
                         new
                         {
                             Id = 3,
-                            AdvantageOn = "Inferno",
-                            DisadvantageOn = "Crystal",
                             Name = "Blaze Lightning",
                             OddsToOne = 4
                         },
                         new
                         {
                             Id = 4,
-                            AdvantageOn = "Oasis",
-                            DisadvantageOn = "Inferno",
                             Name = "Mystic Gallop",
                             OddsToOne = 5
                         },
                         new
                         {
                             Id = 5,
-                            AdvantageOn = "Frostbite",
-                            DisadvantageOn = "Oasis",
                             Name = "Starstrider",
                             OddsToOne = 6
                         },
                         new
                         {
                             Id = 6,
-                            AdvantageOn = "Techno",
-                            DisadvantageOn = "Frostbite",
                             Name = "Shadowfax",
                             OddsToOne = 7
                         },
                         new
                         {
                             Id = 7,
-                            AdvantageOn = "Jungle",
-                            DisadvantageOn = "Techno",
                             Name = "Solar Eclipse",
                             OddsToOne = 8
                         },
                         new
                         {
                             Id = 8,
-                            AdvantageOn = "Coral",
-                            DisadvantageOn = "Jungle",
                             Name = "Velvet Victory",
                             OddsToOne = 9
                         },
                         new
                         {
                             Id = 9,
-                            AdvantageOn = "Serenity",
-                            DisadvantageOn = "Coral",
                             Name = "Lunar Lullaby",
                             OddsToOne = 10
                         },
                         new
                         {
                             Id = 10,
-                            AdvantageOn = "Mirage",
-                            DisadvantageOn = "Serenity",
                             Name = "Silver Streak",
                             OddsToOne = 11
                         },
                         new
                         {
                             Id = 11,
-                            AdvantageOn = "Nebula",
-                            DisadvantageOn = "Mirage",
                             Name = "Quantum Quicksilver",
                             OddsToOne = 12
                         },
                         new
                         {
                             Id = 12,
-                            AdvantageOn = "Crystal",
-                            DisadvantageOn = "Nebula",
                             Name = "Celestial Sprinter",
                             OddsToOne = 2
                         },
                         new
                         {
                             Id = 13,
-                            AdvantageOn = "Inferno",
-                            DisadvantageOn = "Crystal",
                             Name = "Ember Echo",
                             OddsToOne = 3
                         },
                         new
                         {
                             Id = 14,
-                            AdvantageOn = "Oasis",
-                            DisadvantageOn = "Inferno",
                             Name = "Neptune's Nudge",
                             OddsToOne = 4
                         },
                         new
                         {
                             Id = 15,
-                            AdvantageOn = "Frostbite",
-                            DisadvantageOn = "Oasis",
                             Name = "Serendipity Stride",
                             OddsToOne = 5
                         },
                         new
                         {
                             Id = 16,
-                            AdvantageOn = "Techno",
-                            DisadvantageOn = "Frostbite",
                             Name = "Dreamweaver",
                             OddsToOne = 6
                         },
                         new
                         {
                             Id = 17,
-                            AdvantageOn = "Jungle",
-                            DisadvantageOn = "Techno",
                             Name = "Galactic Glide",
                             OddsToOne = 7
                         },
                         new
                         {
                             Id = 18,
-                            AdvantageOn = "Coral",
-                            DisadvantageOn = "Jungle",
                             Name = "Aurora Borealis",
                             OddsToOne = 8
                         },
                         new
                         {
                             Id = 19,
-                            AdvantageOn = "Serenity",
-                            DisadvantageOn = "Coral",
                             Name = "Phoenix Fury",
                             OddsToOne = 9
                         },
                         new
                         {
                             Id = 20,
-                            AdvantageOn = "Mirage",
-                            DisadvantageOn = "Serenity",
                             Name = "Nebula Nova",
                             OddsToOne = 10
                         },
                         new
                         {
                             Id = 21,
-                            AdvantageOn = "Nebula",
-                            DisadvantageOn = "Mirage",
                             Name = "Velvet Vortex",
                             OddsToOne = 11
                         },
                         new
                         {
                             Id = 22,
-                            AdvantageOn = "Crystal",
-                            DisadvantageOn = "Nebula",
                             Name = "Whispering Wind",
                             OddsToOne = 12
                         },
                         new
                         {
                             Id = 23,
-                            AdvantageOn = "Inferno",
-                            DisadvantageOn = "Crystal",
                             Name = "Radiant Rainstorm",
                             OddsToOne = 2
                         },
                         new
                         {
                             Id = 24,
-                            AdvantageOn = "Oasis",
-                            DisadvantageOn = "Inferno",
                             Name = "Spectral Sprint",
                             OddsToOne = 3
                         },
                         new
                         {
                             Id = 25,
-                            AdvantageOn = "Frostbite",
-                            DisadvantageOn = "Oasis",
                             Name = "Dragonfly Dash",
                             OddsToOne = 4
                         },
                         new
                         {
                             Id = 26,
-                            AdvantageOn = "Techno",
-                            DisadvantageOn = "Frostbite",
                             Name = "Enchanted Equestrian",
                             OddsToOne = 5
                         },
                         new
                         {
                             Id = 27,
-                            AdvantageOn = "Jungle",
-                            DisadvantageOn = "Techno",
                             Name = "Pegasus Prism",
                             OddsToOne = 6
                         },
                         new
                         {
                             Id = 28,
-                            AdvantageOn = "Coral",
-                            DisadvantageOn = "Jungle",
                             Name = "Radiant Racer",
                             OddsToOne = 7
                         },
                         new
                         {
                             Id = 29,
-                            AdvantageOn = "Serenity",
-                            DisadvantageOn = "Coral",
                             Name = "Zenith Zephyr",
                             OddsToOne = 8
                         },
                         new
                         {
                             Id = 30,
-                            AdvantageOn = "Mirage",
-                            DisadvantageOn = "Serenity",
                             Name = "Cosmic Cascade",
                             OddsToOne = 9
                         },
                         new
                         {
                             Id = 31,
-                            AdvantageOn = "Nebula",
-                            DisadvantageOn = "Mirage",
                             Name = "Twilight Thunderbolt",
                             OddsToOne = 10
                         },
                         new
                         {
                             Id = 32,
-                            AdvantageOn = "Crystal",
-                            DisadvantageOn = "Nebula",
                             Name = "Mystic Moonlight",
                             OddsToOne = 11
                         },
                         new
                         {
                             Id = 33,
-                            AdvantageOn = "Inferno",
-                            DisadvantageOn = "Crystal",
                             Name = "Nebulous Nectar",
                             OddsToOne = 12
                         },
                         new
                         {
                             Id = 34,
-                            AdvantageOn = "Oasis",
-                            DisadvantageOn = "Inferno",
                             Name = "Stardust Sizzle",
                             OddsToOne = 2
                         },
                         new
                         {
                             Id = 35,
-                            AdvantageOn = "Frostbite",
-                            DisadvantageOn = "Oasis",
                             Name = "Quantum Quasar",
                             OddsToOne = 3
                         },
                         new
                         {
                             Id = 36,
-                            AdvantageOn = "Techno",
-                            DisadvantageOn = "Frostbite",
                             Name = "Shadow Symphony",
                             OddsToOne = 4
                         },
                         new
                         {
                             Id = 37,
-                            AdvantageOn = "Jungle",
-                            DisadvantageOn = "Techno",
                             Name = "Celestial Cyclone",
                             OddsToOne = 5
                         },
                         new
                         {
                             Id = 38,
-                            AdvantageOn = "Coral",
-                            DisadvantageOn = "Jungle",
                             Name = "Luminous Lightning",
                             OddsToOne = 6
                         },
                         new
                         {
                             Id = 39,
-                            AdvantageOn = "Serenity",
-                            DisadvantageOn = "Coral",
                             Name = "Velvet Vibration",
                             OddsToOne = 7
                         },
                         new
                         {
                             Id = 40,
-                            AdvantageOn = "Mirage",
-                            DisadvantageOn = "Serenity",
                             Name = "Solar Serenity",
                             OddsToOne = 8
                         },
                         new
                         {
                             Id = 41,
-                            AdvantageOn = "Nebula",
-                            DisadvantageOn = "Mirage",
                             Name = "Comet Canter",
                             OddsToOne = 9
                         },
                         new
                         {
                             Id = 42,
-                            AdvantageOn = "Crystal",
-                            DisadvantageOn = "Nebula",
                             Name = "Starlight Symphony",
                             OddsToOne = 10
                         },
                         new
                         {
                             Id = 43,
-                            AdvantageOn = "Inferno",
-                            DisadvantageOn = "Crystal",
                             Name = "Phoenix Phenomenon",
                             OddsToOne = 11
                         },
                         new
                         {
                             Id = 44,
-                            AdvantageOn = "Oasis",
-                            DisadvantageOn = "Inferno",
                             Name = "Midnight Melody",
                             OddsToOne = 12
                         },
                         new
                         {
                             Id = 45,
-                            AdvantageOn = "Frostbite",
-                            DisadvantageOn = "Oasis",
                             Name = "Silver Seraph",
                             OddsToOne = 2
                         },
                         new
                         {
                             Id = 46,
-                            AdvantageOn = "Techno",
-                            DisadvantageOn = "Frostbite",
                             Name = "Lunar Luminary",
                             OddsToOne = 4
                         },
                         new
                         {
                             Id = 47,
-                            AdvantageOn = "Jungle",
-                            DisadvantageOn = "Techno",
                             Name = "Nebula Nomad",
                             OddsToOne = 6
                         },
                         new
                         {
                             Id = 48,
-                            AdvantageOn = "Coral",
-                            DisadvantageOn = "Jungle",
                             Name = "Whispering Whirlwind",
                             OddsToOne = 8
                         },
                         new
                         {
                             Id = 49,
-                            AdvantageOn = "Serenity",
-                            DisadvantageOn = "Coral",
                             Name = "Ethereal Elixir",
                             OddsToOne = 10
                         },
                         new
                         {
                             Id = 50,
-                            AdvantageOn = "Mirage",
-                            DisadvantageOn = "Serenity",
                             Name = "Radiant Roamer",
                             OddsToOne = 12
                         });
@@ -524,10 +419,6 @@ namespace UtilityBot.Domain.Migrations
                     b.Property<int>("TimeBetweenRacesInMinutes")
                         .HasColumnType("int");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
                     b.ToTable("Tracks");
@@ -536,82 +427,72 @@ namespace UtilityBot.Domain.Migrations
                         new
                         {
                             Id = 1,
-                            Length = 100,
+                            Length = 2000,
                             Name = "Galactic Grand Circuit",
-                            TimeBetweenRacesInMinutes = 5,
-                            Type = "Nebula"
+                            TimeBetweenRacesInMinutes = 5
                         },
                         new
                         {
                             Id = 2,
-                            Length = 150,
+                            Length = 1500,
                             Name = "Celestial Speedway",
-                            TimeBetweenRacesInMinutes = 10,
-                            Type = "Crystal"
+                            TimeBetweenRacesInMinutes = 10
                         },
                         new
                         {
                             Id = 3,
-                            Length = 200,
+                            Length = 2500,
                             Name = "Nebula Nook Raceway",
-                            TimeBetweenRacesInMinutes = 15,
-                            Type = "Inferno"
+                            TimeBetweenRacesInMinutes = 15
                         },
                         new
                         {
                             Id = 4,
-                            Length = 250,
+                            Length = 1800,
                             Name = "Lunar Loop Lanes",
-                            TimeBetweenRacesInMinutes = 20,
-                            Type = "Oasis"
+                            TimeBetweenRacesInMinutes = 20
                         },
                         new
                         {
                             Id = 5,
-                            Length = 300,
+                            Length = 2200,
                             Name = "Cosmic Carousel Circuit",
-                            TimeBetweenRacesInMinutes = 25,
-                            Type = "Frostbite"
+                            TimeBetweenRacesInMinutes = 25
                         },
                         new
                         {
                             Id = 6,
-                            Length = 350,
+                            Length = 2700,
                             Name = "Starry Stride Speedway",
-                            TimeBetweenRacesInMinutes = 30,
-                            Type = "Techno"
+                            TimeBetweenRacesInMinutes = 30
                         },
                         new
                         {
                             Id = 7,
-                            Length = 400,
+                            Length = 3000,
                             Name = "Enchanted Equine Expressway",
-                            TimeBetweenRacesInMinutes = 35,
-                            Type = "Jungle"
+                            TimeBetweenRacesInMinutes = 35
                         },
                         new
                         {
                             Id = 8,
-                            Length = 450,
+                            Length = 1200,
                             Name = "Solar Sprints Circuit",
-                            TimeBetweenRacesInMinutes = 40,
-                            Type = "Coral"
+                            TimeBetweenRacesInMinutes = 40
                         },
                         new
                         {
                             Id = 9,
-                            Length = 500,
+                            Length = 2000,
                             Name = "Midnight Mirage Oval",
-                            TimeBetweenRacesInMinutes = 45,
-                            Type = "Serenity"
+                            TimeBetweenRacesInMinutes = 45
                         },
                         new
                         {
                             Id = 10,
-                            Length = 1000,
+                            Length = 1600,
                             Name = "Mystic Meadow Racetrack",
-                            TimeBetweenRacesInMinutes = 50,
-                            Type = "Mirage"
+                            TimeBetweenRacesInMinutes = 50
                         });
                 });
 

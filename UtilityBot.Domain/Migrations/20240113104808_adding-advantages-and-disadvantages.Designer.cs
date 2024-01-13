@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UtilityBot.Domain.Database;
 
@@ -11,9 +12,11 @@ using UtilityBot.Domain.Database;
 namespace UtilityBot.Domain.Migrations
 {
     [DbContext(typeof(UtilityBotContext))]
-    partial class UtilityBotContextModelSnapshot : ModelSnapshot
+    [Migration("20240113104808_adding-advantages-and-disadvantages")]
+    partial class addingadvantagesanddisadvantages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,15 +75,15 @@ namespace UtilityBot.Domain.Migrations
                         new
                         {
                             Id = 1,
-                            AdvantageOn = "Nebula",
-                            DisadvantageOn = "Mirage",
+                            AdvantageOn = "Crystal",
+                            DisadvantageOn = "Jungle",
                             Name = "Thunderhoof",
                             OddsToOne = 2
                         },
                         new
                         {
                             Id = 2,
-                            AdvantageOn = "Crystal",
+                            AdvantageOn = "Mirage",
                             DisadvantageOn = "Nebula",
                             Name = "Midnight Mirage",
                             OddsToOne = 3
@@ -88,167 +91,167 @@ namespace UtilityBot.Domain.Migrations
                         new
                         {
                             Id = 3,
-                            AdvantageOn = "Inferno",
-                            DisadvantageOn = "Crystal",
+                            AdvantageOn = "Frostbite",
+                            DisadvantageOn = "Serenity",
                             Name = "Blaze Lightning",
                             OddsToOne = 4
                         },
                         new
                         {
                             Id = 4,
-                            AdvantageOn = "Oasis",
-                            DisadvantageOn = "Inferno",
+                            AdvantageOn = "Jungle",
+                            DisadvantageOn = "Techno",
                             Name = "Mystic Gallop",
                             OddsToOne = 5
                         },
                         new
                         {
                             Id = 5,
-                            AdvantageOn = "Frostbite",
-                            DisadvantageOn = "Oasis",
+                            AdvantageOn = "Coral",
+                            DisadvantageOn = "Inferno",
                             Name = "Starstrider",
                             OddsToOne = 6
                         },
                         new
                         {
                             Id = 6,
-                            AdvantageOn = "Techno",
-                            DisadvantageOn = "Frostbite",
+                            AdvantageOn = "Serenity",
+                            DisadvantageOn = "Crystal",
                             Name = "Shadowfax",
                             OddsToOne = 7
                         },
                         new
                         {
                             Id = 7,
-                            AdvantageOn = "Jungle",
-                            DisadvantageOn = "Techno",
+                            AdvantageOn = "Mirage",
+                            DisadvantageOn = "Nebula",
                             Name = "Solar Eclipse",
                             OddsToOne = 8
                         },
                         new
                         {
                             Id = 8,
-                            AdvantageOn = "Coral",
-                            DisadvantageOn = "Jungle",
+                            AdvantageOn = "Jungle",
+                            DisadvantageOn = "Frostbite",
                             Name = "Velvet Victory",
                             OddsToOne = 9
                         },
                         new
                         {
                             Id = 9,
-                            AdvantageOn = "Serenity",
-                            DisadvantageOn = "Coral",
+                            AdvantageOn = "Nebula",
+                            DisadvantageOn = "Techno",
                             Name = "Lunar Lullaby",
                             OddsToOne = 10
                         },
                         new
                         {
                             Id = 10,
-                            AdvantageOn = "Mirage",
-                            DisadvantageOn = "Serenity",
+                            AdvantageOn = "Frostbite",
+                            DisadvantageOn = "Coral",
                             Name = "Silver Streak",
                             OddsToOne = 11
                         },
                         new
                         {
                             Id = 11,
-                            AdvantageOn = "Nebula",
-                            DisadvantageOn = "Mirage",
+                            AdvantageOn = "Techno",
+                            DisadvantageOn = "Serenity",
                             Name = "Quantum Quicksilver",
                             OddsToOne = 12
                         },
                         new
                         {
                             Id = 12,
-                            AdvantageOn = "Crystal",
-                            DisadvantageOn = "Nebula",
+                            AdvantageOn = "Coral",
+                            DisadvantageOn = "Inferno",
                             Name = "Celestial Sprinter",
                             OddsToOne = 2
                         },
                         new
                         {
                             Id = 13,
-                            AdvantageOn = "Inferno",
-                            DisadvantageOn = "Crystal",
+                            AdvantageOn = "Jungle",
+                            DisadvantageOn = "Nebula",
                             Name = "Ember Echo",
                             OddsToOne = 3
                         },
                         new
                         {
                             Id = 14,
-                            AdvantageOn = "Oasis",
-                            DisadvantageOn = "Inferno",
+                            AdvantageOn = "Frostbite",
+                            DisadvantageOn = "Serenity",
                             Name = "Neptune's Nudge",
                             OddsToOne = 4
                         },
                         new
                         {
                             Id = 15,
-                            AdvantageOn = "Frostbite",
-                            DisadvantageOn = "Oasis",
+                            AdvantageOn = "Jungle",
+                            DisadvantageOn = "Techno",
                             Name = "Serendipity Stride",
                             OddsToOne = 5
                         },
                         new
                         {
                             Id = 16,
-                            AdvantageOn = "Techno",
-                            DisadvantageOn = "Frostbite",
+                            AdvantageOn = "Serenity",
+                            DisadvantageOn = "Crystal",
                             Name = "Dreamweaver",
                             OddsToOne = 6
                         },
                         new
                         {
                             Id = 17,
-                            AdvantageOn = "Jungle",
-                            DisadvantageOn = "Techno",
+                            AdvantageOn = "Mirage",
+                            DisadvantageOn = "Nebula",
                             Name = "Galactic Glide",
                             OddsToOne = 7
                         },
                         new
                         {
                             Id = 18,
-                            AdvantageOn = "Coral",
-                            DisadvantageOn = "Jungle",
+                            AdvantageOn = "Frostbite",
+                            DisadvantageOn = "Serenity",
                             Name = "Aurora Borealis",
                             OddsToOne = 8
                         },
                         new
                         {
                             Id = 19,
-                            AdvantageOn = "Serenity",
-                            DisadvantageOn = "Coral",
+                            AdvantageOn = "Jungle",
+                            DisadvantageOn = "Techno",
                             Name = "Phoenix Fury",
                             OddsToOne = 9
                         },
                         new
                         {
                             Id = 20,
-                            AdvantageOn = "Mirage",
-                            DisadvantageOn = "Serenity",
+                            AdvantageOn = "Coral",
+                            DisadvantageOn = "Inferno",
                             Name = "Nebula Nova",
                             OddsToOne = 10
                         },
                         new
                         {
                             Id = 21,
-                            AdvantageOn = "Nebula",
-                            DisadvantageOn = "Mirage",
+                            AdvantageOn = "Techno",
+                            DisadvantageOn = "Serenity",
                             Name = "Velvet Vortex",
                             OddsToOne = 11
                         },
                         new
                         {
                             Id = 22,
-                            AdvantageOn = "Crystal",
-                            DisadvantageOn = "Nebula",
+                            AdvantageOn = "Coral",
+                            DisadvantageOn = "Inferno",
                             Name = "Whispering Wind",
                             OddsToOne = 12
                         },
                         new
                         {
                             Id = 23,
-                            AdvantageOn = "Inferno",
+                            AdvantageOn = "Serenity",
                             DisadvantageOn = "Crystal",
                             Name = "Radiant Rainstorm",
                             OddsToOne = 2
@@ -256,8 +259,8 @@ namespace UtilityBot.Domain.Migrations
                         new
                         {
                             Id = 24,
-                            AdvantageOn = "Oasis",
-                            DisadvantageOn = "Inferno",
+                            AdvantageOn = "Mirage",
+                            DisadvantageOn = "Nebula",
                             Name = "Spectral Sprint",
                             OddsToOne = 3
                         },
@@ -265,62 +268,62 @@ namespace UtilityBot.Domain.Migrations
                         {
                             Id = 25,
                             AdvantageOn = "Frostbite",
-                            DisadvantageOn = "Oasis",
+                            DisadvantageOn = "Serenity",
                             Name = "Dragonfly Dash",
                             OddsToOne = 4
                         },
                         new
                         {
                             Id = 26,
-                            AdvantageOn = "Techno",
-                            DisadvantageOn = "Frostbite",
+                            AdvantageOn = "Jungle",
+                            DisadvantageOn = "Techno",
                             Name = "Enchanted Equestrian",
                             OddsToOne = 5
                         },
                         new
                         {
                             Id = 27,
-                            AdvantageOn = "Jungle",
-                            DisadvantageOn = "Techno",
+                            AdvantageOn = "Oasis",
+                            DisadvantageOn = "Inferno",
                             Name = "Pegasus Prism",
                             OddsToOne = 6
                         },
                         new
                         {
                             Id = 28,
-                            AdvantageOn = "Coral",
-                            DisadvantageOn = "Jungle",
+                            AdvantageOn = "Techno",
+                            DisadvantageOn = "Serenity",
                             Name = "Radiant Racer",
                             OddsToOne = 7
                         },
                         new
                         {
                             Id = 29,
-                            AdvantageOn = "Serenity",
-                            DisadvantageOn = "Coral",
+                            AdvantageOn = "Coral",
+                            DisadvantageOn = "Inferno",
                             Name = "Zenith Zephyr",
                             OddsToOne = 8
                         },
                         new
                         {
                             Id = 30,
-                            AdvantageOn = "Mirage",
-                            DisadvantageOn = "Serenity",
+                            AdvantageOn = "Jungle",
+                            DisadvantageOn = "Techno",
                             Name = "Cosmic Cascade",
                             OddsToOne = 9
                         },
                         new
                         {
                             Id = 31,
-                            AdvantageOn = "Nebula",
-                            DisadvantageOn = "Mirage",
+                            AdvantageOn = "Serenity",
+                            DisadvantageOn = "Crystal",
                             Name = "Twilight Thunderbolt",
                             OddsToOne = 10
                         },
                         new
                         {
                             Id = 32,
-                            AdvantageOn = "Crystal",
+                            AdvantageOn = "Mirage",
                             DisadvantageOn = "Nebula",
                             Name = "Mystic Moonlight",
                             OddsToOne = 11
@@ -328,24 +331,24 @@ namespace UtilityBot.Domain.Migrations
                         new
                         {
                             Id = 33,
-                            AdvantageOn = "Inferno",
-                            DisadvantageOn = "Crystal",
+                            AdvantageOn = "Frostbite",
+                            DisadvantageOn = "Serenity",
                             Name = "Nebulous Nectar",
                             OddsToOne = 12
                         },
                         new
                         {
                             Id = 34,
-                            AdvantageOn = "Oasis",
-                            DisadvantageOn = "Inferno",
+                            AdvantageOn = "Jungle",
+                            DisadvantageOn = "Techno",
                             Name = "Stardust Sizzle",
                             OddsToOne = 2
                         },
                         new
                         {
                             Id = 35,
-                            AdvantageOn = "Frostbite",
-                            DisadvantageOn = "Oasis",
+                            AdvantageOn = "Coral",
+                            DisadvantageOn = "Inferno",
                             Name = "Quantum Quasar",
                             OddsToOne = 3
                         },
@@ -353,23 +356,23 @@ namespace UtilityBot.Domain.Migrations
                         {
                             Id = 36,
                             AdvantageOn = "Techno",
-                            DisadvantageOn = "Frostbite",
+                            DisadvantageOn = "Oasis",
                             Name = "Shadow Symphony",
                             OddsToOne = 4
                         },
                         new
                         {
                             Id = 37,
-                            AdvantageOn = "Jungle",
-                            DisadvantageOn = "Techno",
+                            AdvantageOn = "Coral",
+                            DisadvantageOn = "Inferno",
                             Name = "Celestial Cyclone",
                             OddsToOne = 5
                         },
                         new
                         {
                             Id = 38,
-                            AdvantageOn = "Coral",
-                            DisadvantageOn = "Jungle",
+                            AdvantageOn = "Jungle",
+                            DisadvantageOn = "Techno",
                             Name = "Luminous Lightning",
                             OddsToOne = 6
                         },
@@ -377,7 +380,7 @@ namespace UtilityBot.Domain.Migrations
                         {
                             Id = 39,
                             AdvantageOn = "Serenity",
-                            DisadvantageOn = "Coral",
+                            DisadvantageOn = "Crystal",
                             Name = "Velvet Vibration",
                             OddsToOne = 7
                         },
@@ -385,31 +388,31 @@ namespace UtilityBot.Domain.Migrations
                         {
                             Id = 40,
                             AdvantageOn = "Mirage",
-                            DisadvantageOn = "Serenity",
+                            DisadvantageOn = "Nebula",
                             Name = "Solar Serenity",
                             OddsToOne = 8
                         },
                         new
                         {
                             Id = 41,
-                            AdvantageOn = "Nebula",
-                            DisadvantageOn = "Mirage",
+                            AdvantageOn = "Frostbite",
+                            DisadvantageOn = "Serenity",
                             Name = "Comet Canter",
                             OddsToOne = 9
                         },
                         new
                         {
                             Id = 42,
-                            AdvantageOn = "Crystal",
-                            DisadvantageOn = "Nebula",
+                            AdvantageOn = "Jungle",
+                            DisadvantageOn = "Techno",
                             Name = "Starlight Symphony",
                             OddsToOne = 10
                         },
                         new
                         {
                             Id = 43,
-                            AdvantageOn = "Inferno",
-                            DisadvantageOn = "Crystal",
+                            AdvantageOn = "Coral",
+                            DisadvantageOn = "Inferno",
                             Name = "Phoenix Phenomenon",
                             OddsToOne = 11
                         },
@@ -417,55 +420,55 @@ namespace UtilityBot.Domain.Migrations
                         {
                             Id = 44,
                             AdvantageOn = "Oasis",
-                            DisadvantageOn = "Inferno",
+                            DisadvantageOn = "Serenity",
                             Name = "Midnight Melody",
                             OddsToOne = 12
                         },
                         new
                         {
                             Id = 45,
-                            AdvantageOn = "Frostbite",
-                            DisadvantageOn = "Oasis",
+                            AdvantageOn = "Coral",
+                            DisadvantageOn = "Inferno",
                             Name = "Silver Seraph",
                             OddsToOne = 2
                         },
                         new
                         {
                             Id = 46,
-                            AdvantageOn = "Techno",
-                            DisadvantageOn = "Frostbite",
+                            AdvantageOn = "Jungle",
+                            DisadvantageOn = "Techno",
                             Name = "Lunar Luminary",
                             OddsToOne = 4
                         },
                         new
                         {
                             Id = 47,
-                            AdvantageOn = "Jungle",
-                            DisadvantageOn = "Techno",
+                            AdvantageOn = "Serenity",
+                            DisadvantageOn = "Crystal",
                             Name = "Nebula Nomad",
                             OddsToOne = 6
                         },
                         new
                         {
                             Id = 48,
-                            AdvantageOn = "Coral",
-                            DisadvantageOn = "Jungle",
+                            AdvantageOn = "Mirage",
+                            DisadvantageOn = "Nebula",
                             Name = "Whispering Whirlwind",
                             OddsToOne = 8
                         },
                         new
                         {
                             Id = 49,
-                            AdvantageOn = "Serenity",
-                            DisadvantageOn = "Coral",
+                            AdvantageOn = "Frostbite",
+                            DisadvantageOn = "Serenity",
                             Name = "Ethereal Elixir",
                             OddsToOne = 10
                         },
                         new
                         {
                             Id = 50,
-                            AdvantageOn = "Mirage",
-                            DisadvantageOn = "Serenity",
+                            AdvantageOn = "Jungle",
+                            DisadvantageOn = "Techno",
                             Name = "Radiant Roamer",
                             OddsToOne = 12
                         });

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -63,6 +63,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\UtilityBot.Casino\UtilityBot.Casino.csproj" />
     <ProjectReference Include="..\UtilityBot.Contracts\UtilityBot.Contracts.csproj" />
     <ProjectReference Include="..\UtilityBot.Domain\UtilityBot.Domain.csproj" />
   </ItemGroup>

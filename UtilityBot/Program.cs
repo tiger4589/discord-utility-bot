@@ -4,16 +4,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using UtilityBot.Casino.HorseRaces;
 using UtilityBot.Client;
 using UtilityBot.Domain.Database;
 using UtilityBot.Domain.Mappers;
 using UtilityBot.Domain.Services.ConfigurationService.Interfaces;
 using UtilityBot.Domain.Services.ConfigurationService.Services;
+using UtilityBot.Domain.Services.HorseRaceServices;
 using UtilityBot.Domain.Services.UserNoteServices;
 using UtilityBot.Services.CacheService;
 using UtilityBot.Services.EventLogService;
 using UtilityBot.Services.GuildJoinedServices.Interfaces;
 using UtilityBot.Services.GuildJoinedServices.Managers;
+using UtilityBot.Services.HorseRaces;
 using UtilityBot.Services.InteractionServiceManager;
 using UtilityBot.Services.JokesServices;
 using UtilityBot.Services.KoCMemesServices;
@@ -90,6 +93,9 @@ IServiceProvider BuildServiceProvider() => new ServiceCollection()
     .AddSingleton<IUnoManager, UnoManager>()
     .AddSingleton<IUnoGameManager, UnoGameManager>()
     .AddSingleton<IKoCMemeService, KoCMemeService>()
+    .AddSingleton<IHorseRaceService, HorseRaceService>()
+    .AddSingleton<IHorseRaceManager, HorseRaceManager>()
+    .AddSingleton<IBotHorseRaceManager, BotHorseRaceManager>()
     .BuildServiceProvider();
 
 void InitializeMainComponents()
@@ -108,5 +114,6 @@ void InitializeMainComponents()
     serviceProvider.GetRequiredService<IMagicEightBall>();
     serviceProvider.GetRequiredService<IUnoManager>();
     serviceProvider.GetRequiredService<IKoCMemeService>();
+    serviceProvider.GetRequiredService<IBotHorseRaceManager>();
 }
 
