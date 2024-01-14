@@ -93,11 +93,14 @@ public abstract class BaseApiCallService
 
             try
             {
+                var readAsStringAsync = await response.Content.ReadAsStringAsync();
+                await Logger.Log($"{readAsStringAsync}");
                 var result = await response.Content.ReadFromJsonAsync<T?>();
                 return result;
             }
             catch (Exception e)
             {
+                await Logger.Log($"Error calling API - Message: {e.Message}");
                 return null;
             }
         }

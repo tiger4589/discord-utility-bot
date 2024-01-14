@@ -1,8 +1,7 @@
-﻿using Discord;
-using Discord.Interactions;
-using UtilityBot.Services.Uno.UnoGameDomain.GameAssets;
+﻿using Discord.Interactions;
+using UtilityBot.Services.HorseRaces;
 
-namespace UtilityBot.Services.HorseRaces;
+namespace UtilityBot.Modules;
 
 public class HorseRaceModule : InteractionModuleBase<SocketInteractionContext>
 {

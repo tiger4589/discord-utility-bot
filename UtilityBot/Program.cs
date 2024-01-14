@@ -16,6 +16,7 @@ using UtilityBot.Services.CacheService;
 using UtilityBot.Services.EventLogService;
 using UtilityBot.Services.GuildJoinedServices.Interfaces;
 using UtilityBot.Services.GuildJoinedServices.Managers;
+using UtilityBot.Services.HangmanServices;
 using UtilityBot.Services.HorseRaces;
 using UtilityBot.Services.InteractionServiceManager;
 using UtilityBot.Services.JokesServices;
@@ -96,6 +97,7 @@ IServiceProvider BuildServiceProvider() => new ServiceCollection()
     .AddSingleton<IHorseRaceService, HorseRaceService>()
     .AddSingleton<IHorseRaceManager, HorseRaceManager>()
     .AddSingleton<IBotHorseRaceManager, BotHorseRaceManager>()
+    .AddSingleton<IHangmanService, HangmanService>()
     .BuildServiceProvider();
 
 void InitializeMainComponents()
