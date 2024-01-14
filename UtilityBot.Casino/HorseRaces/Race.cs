@@ -40,11 +40,6 @@ public class Race
         }
     }
 
-    public async Task Stop()
-    {
-
-    }
-
     public async Task Start()
     {
         while (!IsFinished)
@@ -169,12 +164,12 @@ public class Race
     {
         if (horseStep.Horse.AdvantageOn == Track.Type)
         {
-            return steps + 1;
+            return steps + _random.Next(0,2);
         }
 
         if (horseStep.Horse.DisadvantageOn == Track.Type)
         {
-            return steps - 1;
+            return steps - _random.Next(0, 2);
         }
 
         return steps;

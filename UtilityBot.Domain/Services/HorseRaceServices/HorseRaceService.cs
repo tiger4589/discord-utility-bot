@@ -10,6 +10,8 @@ public interface IHorseRaceService
     Task<HorsesAndTracks> GetHorsesAndTracksAsync();
     Task<int> AddRaceAsync(int trackId, List<RaceStanding> standings);
     Task InsertPredictions(List<ulong> correctPredictions, List<ulong> wrongPredictions);
+    Task<IEnumerable<UserPrediction>> GetAllPredictionsAsync();
+    Task<IEnumerable<HorsesAndWins>> GetHorsesStandings();
 }
 
 public class HorseRaceService : IHorseRaceService
@@ -79,5 +81,24 @@ public class HorseRaceService : IHorseRaceService
         }
 
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<IEnumerable<UserPrediction>> GetAllPredictionsAsync()
+    {
+        return await _context.UserPredictions!.ToListAsync();
+    }
+
+    public async Task<IEnumerable<HorsesAndWins>> GetHorsesStandings()
+    {
+        return await _context.HorseRaces!
+            .Join(_context.RaceStandings!, hr => hr.Id, rs => rs.RaceId, (hr, rs) => new { hr, rs })
+            .Join(_context.Horses!, arg => arg.rs.HorseId, h => h.Id, (rs, h) => new { rs, h })
+            .GroupBy(x => x.h.Id)
+            .Select(x => new HorsesAndWins
+            {
+                Horse = x.First(y => y.h.Id == x.Key).h,
+                RacesParticipatedAt = x.Count(),
+                RacesWon = x.Count(y => y.rs.rs.Position == 1)
+            }).ToListAsync();
     }
 }
