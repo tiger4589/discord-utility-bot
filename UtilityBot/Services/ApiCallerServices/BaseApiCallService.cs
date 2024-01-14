@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
+using UtilityBot.Services.LoggingServices;
 
 namespace UtilityBot.Services.ApiCallerServices;
 
@@ -102,8 +103,8 @@ public abstract class BaseApiCallService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            throw;
+            await Logger.Log($"Error calling API - Message: {e.Message}");
+            return null;
         }
     }
 }
