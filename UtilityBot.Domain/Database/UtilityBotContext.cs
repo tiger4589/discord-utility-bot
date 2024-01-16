@@ -38,12 +38,15 @@ public class UtilityBotContext : DbContext
     public DbSet<HorseRace>? HorseRaces { get; set; }
     public DbSet<RaceStanding>? RaceStandings { get; set; }
     public DbSet<UserPrediction>? UserPredictions { get; set; }
+    public DbSet<HangmanWordRequest>? HangmanWordRequests { get; set; }
+    public DbSet<HangmanGames>? HangmanGames { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserJoinConfiguration>().HasKey(x => new { x.GuildId, ActionType = x.Action });
         modelBuilder.Entity<UserJoinRole>().HasKey(x => new { x.GuildId, x.RoleId });
         modelBuilder.Entity<RaceStanding>().HasKey(x => new { x.RaceId, x.HorseId });
         modelBuilder.Entity<UserPrediction>().HasIndex(x => x.UserId);
+        modelBuilder.Entity<HangmanGames>().HasIndex(x => x.UserId);
         modelBuilder.Entity<RumbleMessageConfiguration>().HasData(new List<RumbleMessageConfiguration>
         {
             new()

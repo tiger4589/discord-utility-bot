@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UtilityBot.Domain.Database;
 
@@ -11,9 +12,11 @@ using UtilityBot.Domain.Database;
 namespace UtilityBot.Domain.Migrations
 {
     [DbContext(typeof(UtilityBotContext))]
-    partial class UtilityBotContextModelSnapshot : ModelSnapshot
+    [Migration("20240114232744_hangman")]
+    partial class hangman
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -744,34 +747,6 @@ namespace UtilityBot.Domain.Migrations
                             EventName = "MessageDeleted",
                             IsEnabled = true
                         });
-                });
-
-            modelBuilder.Entity("UtilityBot.Domain.DomainObjects.HangmanGames", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("IsCorrect")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("UserId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<string>("Word")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("HangmanGames");
                 });
 
             modelBuilder.Entity("UtilityBot.Domain.DomainObjects.HangmanWordRequest", b =>

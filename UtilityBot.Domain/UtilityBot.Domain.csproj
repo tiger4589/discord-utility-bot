@@ -11,6 +11,7 @@
     <Folder Include="DomainObjects\CasinoModels\HorseRaces\" />
     <Folder Include="Mappers\" />
     <Folder Include="Services\ConfigurationService\Services\" />
+    <Folder Include="Services\HangmanServices\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -235,7 +235,7 @@ public class BotHorseRaceManager : IBotHorseRaceManager
         for (int i = 0; i < userPredictions.Count; i++)
         {
             var user = await _client.GetUserAsync(userPredictions[i].UserId);
-            sb.AppendLine($"#{i + 1} - {user.Username} - {userPredictions[i].CorrectPredictions}");
+            sb.AppendLine($"#{i + 1} - {user?.Username ?? "UserNotFound"} - {userPredictions[i].CorrectPredictions}");
         }
 
         sb.AppendLine("```");
@@ -280,7 +280,7 @@ public class BotHorseRaceManager : IBotHorseRaceManager
         {
             var user = await _client.GetUserAsync(userPredictions[i].UserId);
             sb.AppendLine(
-                $"#{i + 1} - {user.Username} - {((userPredictions[i].CorrectPredictions * 1.0) / (userPredictions[i].CorrectPredictions + userPredictions[i].WrongPredictions)) * 100:F}%");
+                $"#{i + 1} - {user?.Username ?? "UserNotFound"} - {((userPredictions[i].CorrectPredictions * 1.0) / (userPredictions[i].CorrectPredictions + userPredictions[i].WrongPredictions)) * 100:F}%");
         }
 
         sb.AppendLine("```");

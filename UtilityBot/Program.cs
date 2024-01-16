@@ -10,6 +10,7 @@ using UtilityBot.Domain.Database;
 using UtilityBot.Domain.Mappers;
 using UtilityBot.Domain.Services.ConfigurationService.Interfaces;
 using UtilityBot.Domain.Services.ConfigurationService.Services;
+using UtilityBot.Domain.Services.HangmanServices;
 using UtilityBot.Domain.Services.HorseRaceServices;
 using UtilityBot.Domain.Services.UserNoteServices;
 using UtilityBot.Services.CacheService;
@@ -98,6 +99,8 @@ IServiceProvider BuildServiceProvider() => new ServiceCollection()
     .AddSingleton<IHorseRaceManager, HorseRaceManager>()
     .AddSingleton<IBotHorseRaceManager, BotHorseRaceManager>()
     .AddSingleton<IHangmanService, HangmanService>()
+    .AddSingleton<IHangmanGameManager, HangmanGameManager>()
+    .AddSingleton<IHangmanDomainService, HangmanDomainService>()
     .BuildServiceProvider();
 
 void InitializeMainComponents()
