@@ -6,8 +6,8 @@ namespace UtilityBot.Domain.Services.HangmanServices;
 
 public interface IHangmanDomainService
 {
-    Task<bool> IsAllowed();
-    Task AddWordRequest(string word, string? definition);
+    Task<bool> IsAllowed(EWordsApiSource source, int allowedNumbers, int lastHours);
+    Task AddWordRequest(string word, string? definition, EWordsApiSource source);
     Task AddGame(HangmanGames game);
     Task<IEnumerable<HangmanGames>> GetGames(ulong userId);
     Task<IEnumerable<HangmanGames>> GetGames();
@@ -22,24 +22,25 @@ public class HangmanDomainService : IHangmanDomainService
         _context = context;
     }
 
-    public async Task<bool> IsAllowed()
+    public async Task<bool> IsAllowed(EWordsApiSource source, int allowedNumbers, int lastHours)
     {
-        var last24H = DateTime.UtcNow.AddHours(-24);
+        var last24H = DateTime.UtcNow.AddHours(lastHours);
 
         var count = await _context.HangmanWordRequests!
-            .Where(x => x.RequestedAt > last24H)
+            .Where(x => x.RequestedAt > last24H && x.Source == source)
             .CountAsync();
 
-        return count < 2500;
+        return count < allowedNumbers;
     }
 
-    public async Task AddWordRequest(string word, string? definition)
+    public async Task AddWordRequest(string word, string? definition, EWordsApiSource source)
     {
         await _context.HangmanWordRequests!.AddAsync(new HangmanWordRequest
         {
             Definition = definition,
             RequestedAt = DateTime.UtcNow,
-            Word = word
+            Word = word,
+            Source = source
         });
         await _context.SaveChangesAsync();
     }

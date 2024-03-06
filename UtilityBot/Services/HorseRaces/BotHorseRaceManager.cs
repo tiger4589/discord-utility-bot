@@ -51,10 +51,10 @@ public class BotHorseRaceManager : IBotHorseRaceManager
             await HorseRaceManagerOnRaceStarting(sender, args);
         };
 
-        var timer = new Timer(60 * 60 * 1000);
-        timer.Elapsed += async (_, _) => { await ShowStandings(); };
-        timer.AutoReset = true;
-        timer.Enabled = true;
+        //var timer = new Timer(60 * 60 * 1000);
+        //timer.Elapsed += async (_, _) => { await ShowStandings(); };
+        //timer.AutoReset = true;
+        //timer.Enabled = true;
     }
 
     private async Task ShowStandings()

@@ -8,7 +8,7 @@ namespace UtilityBot.Services.HangmanServices;
 
 public interface IHangmanGameManager
 {
-    Task StartNewGame(SocketInteractionContext context);
+    Task StartNewGame(SocketInteractionContext context, EWordsFormat format);
     Task ForceStopGame(SocketInteractionContext context);
     Task GuessLetter(SocketInteractionContext context, char letter);
     Task GiveUpGame(SocketInteractionContext context);
@@ -30,7 +30,7 @@ public class HangmanGameManager : IHangmanGameManager
         _hangmanService = hangmanService;
     }
 
-    public async Task StartNewGame(SocketInteractionContext context)
+    public async Task StartNewGame(SocketInteractionContext context, EWordsFormat format)
     {
         bool isRunning;
         lock (_lock)
@@ -57,7 +57,7 @@ public class HangmanGameManager : IHangmanGameManager
             return;
         }
 
-        var game = new HangmanGame(word.Item1!);
+        var game = new HangmanGame(word.Item1!, format);
         lock (_lock)
         {
             _hangmanGames.Add(context.User.Id, game);
@@ -566,6 +566,7 @@ public class HangmanGameManager : IHangmanGameManager
 
 public class HangmanGame
 {
+    private readonly EWordsFormat _format;
     public Guid Id { get; } = Guid.NewGuid();
     public HangmanGameState State { get; set; } = HangmanGameState.InProgress;
     public HangmanWord Word { get; }
@@ -588,8 +589,9 @@ public class HangmanGame
     private int _tries;
     private int _numberOfLettersFound;
     private int _numberOfLetters;
-    public HangmanGame(HangmanWord word)
+    public HangmanGame(HangmanWord word, EWordsFormat format)
     {
+        _format = format;
         Word = word;
         OriginalWord = word.Word.ToLower();
         Initialize();
@@ -597,28 +599,60 @@ public class HangmanGame
 
     private void Initialize()
     {
+        switch (_format)
+        {
+            case EWordsFormat.WithoutSpace:
+                InitializeWithoutSpace();
+                break;
+            case EWordsFormat.WithSpace:
+                InitializeWithSpace();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private void InitializeWithSpace()
+    {
+
         List<char> hiddenWordWithSpaces = new();
-        //char[] hiddenWord = new char[OriginalWord.Length];
+
         for (int i = 0; i < OriginalWord.Length; i++)
         {
             char o = OriginalWord[i];
             if (_allLetters.Contains(o))
             {
                 _numberOfLetters++;
-                //hiddenWord[i] = '_';
-                //hiddenWord[i] = _underbar;
                 hiddenWordWithSpaces.Add('_');
                 hiddenWordWithSpaces.Add(' ');
                 continue;
             }
 
-            //  hiddenWord[i] = o;
             hiddenWordWithSpaces.Add(o);
             hiddenWordWithSpaces.Add(' ');
         }
 
         HiddenWord = new string(hiddenWordWithSpaces.ToArray());
-        // HiddenWord = new string(hiddenWord);
+        _availableLetters.AddRange(_allLetters);
+    }
+
+    private void InitializeWithoutSpace()
+    {
+        char[] hiddenWord = new char[OriginalWord.Length];
+        for (int i = 0; i < OriginalWord.Length; i++)
+        {
+            char o = OriginalWord[i];
+            if (_allLetters.Contains(o))
+            {
+                _numberOfLetters++;
+                hiddenWord[i] = '_';
+                continue;
+            }
+
+            hiddenWord[i] = o;
+        }
+
+        HiddenWord = new string(hiddenWord);
         _availableLetters.AddRange(_allLetters);
     }
 
@@ -642,8 +676,15 @@ public class HangmanGame
                 if (OriginalWord[i] == letter)
                 {
                     numberOfPlaces++;
-                     hiddenWord[i*2] = letter;
-                    //hiddenWord[i] = letter;
+                    switch (_format)
+                    {
+                        case EWordsFormat.WithoutSpace:
+                            hiddenWord[i] = letter;
+                            break;
+                        case EWordsFormat.WithSpace:
+                            hiddenWord[i*2] = letter;
+                            break;
+                    }
                 }
             }
 
@@ -678,4 +719,12 @@ public enum SortBy
     Games,
     Score,
     Wins
+}
+
+public enum EWordsFormat
+{
+    [ChoiceDisplay("Without Space")]
+    WithoutSpace,
+    [ChoiceDisplay("With Space")]
+    WithSpace
 }

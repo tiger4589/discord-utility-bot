@@ -9,4 +9,11 @@ public class HangmanWordRequest
     public string Word { get; set; } = null!;
     public string? Definition { get; set; }
     public DateTime RequestedAt { get; set; }
+    public EWordsApiSource Source { get; set; } = EWordsApiSource.WordsApi;
+}
+
+public enum EWordsApiSource
+{
+    WordsApi,
+    Wordnik
 }

@@ -29,7 +29,83 @@ public class HangmanService : BaseApiCallService, IHangmanService
 
     public async Task<(HangmanWord?, bool)> GetRandomWord()
     {
-        var allowed = await _domainService.IsAllowed();
+        var (hangmanWord, isOk) = await GetRandomWordsFromWordnik();
+
+        if (isOk)
+        {
+            return (hangmanWord, false);
+        }
+
+        return await GetRandomWordFromWordsApi();
+    }
+
+    private async Task<(HangmanWord?, bool)> GetRandomWordsFromWordnik()
+    {
+        var allowed = await _domainService.IsAllowed(EWordsApiSource.Wordnik, 50, -1);
+        if (!allowed)
+        {
+            await Logger.Log($"Hangman word request limit reached For Wordnik");
+            return (null, true);
+        }
+
+        var apiUrl = _configuration["WordnikBaseUrl"]!;
+        var apiKey = _configuration["WordnikApiKey"]!;
+        ServiceUrl = string.Concat(apiUrl, $"words.json/randomWord?hasDictionaryDef=true&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key={apiKey}");
+
+        var headers = new Dictionary<string, string>
+        {
+            { "Accept", "application/json" },
+            { "User-Agent", "discord-utility-bot" }
+        };
+
+        var word = await GetApiFromServiceUrl<WordnikWord>(headers);
+
+        if (word == null || string.IsNullOrWhiteSpace(word.Word))
+        {
+            await Logger.Log($"Couldn't find a random word from Wordnik API");
+            return (null, false);
+        }
+
+        ServiceUrl = string.Concat(apiUrl, $"word.json/{word.Word}/definitions?limit=5&includeRelated=false&sourceDictionaries=all&useCanonical=false&includeTags=false&api_key={apiKey}");
+        var words = await GetApiFromServiceUrl<List<WordnikWord>>(headers);
+
+        if (words == null || words.Count == 0)
+        {
+            await Logger.Log($"Couldn't find a random word definition from Wordnik API");
+            return (null, false);
+        }
+
+        word = words.Count == 1  
+            ? words.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x.Text)) 
+            : words.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x.Text) && !x.Text.Contains('<'));
+
+        await _domainService.AddWordRequest(word?.Word ?? "WordNotReturned",
+            word?.Text,
+            EWordsApiSource.Wordnik);
+
+        if (word == null)
+        {
+            await Logger.Log($"Couldn't find a random word from Wordnik API");
+            return (null, false);
+        }
+
+        return (new HangmanWord
+        {
+            Results = new List<Result>
+            {
+                new()
+                {
+                    Definition = word.Text?.Replace("<xref>","").Replace("</xref>","")
+                        .Replace("<internalXref urlencoded=\"reard\">", "").Replace("</internalXref>","")
+                }
+            },
+            Word = word.Word!
+        }, true);
+    }
+
+    private async Task<(HangmanWord?, bool)> GetRandomWordFromWordsApi()
+    {
+        var allowed = await _domainService.IsAllowed(EWordsApiSource.WordsApi, 2500, -24);
         if (!allowed)
         {
             await Logger.Log($"Hangman word request limit reached");
@@ -43,13 +119,15 @@ public class HangmanService : BaseApiCallService, IHangmanService
         {
             { "Accept", "application/json" },
             { "User-Agent", "discord-utility-bot" },
-            {"X-RapidAPI-Key",_configuration["WordsApiKey"]!},
-            {"X-RapidAPI-Host", _configuration["WordsApiHost"]!}
+            { "X-RapidAPI-Key", _configuration["WordsApiKey"]! },
+            { "X-RapidAPI-Host", _configuration["WordsApiHost"]! }
         };
 
         var word = await GetApiFromServiceUrl<HangmanWord>(headers);
 
-        await _domainService.AddWordRequest(word?.Word ?? "WordNotReturned", word?.Results.FirstOrDefault(x=>!string.IsNullOrWhiteSpace(x.Definition))?.Definition);
+        await _domainService.AddWordRequest(word?.Word ?? "WordNotReturned",
+            word?.Results.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x.Definition))?.Definition,
+            EWordsApiSource.WordsApi);
 
         if (word == null)
         {
@@ -98,6 +176,13 @@ public class HangmanService : BaseApiCallService, IHangmanService
 
         return topStats;
     }
+}
+
+public class WordnikWord
+{
+    public string Word { get; set; } = null!;
+    public string? SourceDictionary { get; set; }
+    public string? Text { get; set; }
 }
 
 public class HangmanWord

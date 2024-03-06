@@ -16,7 +16,7 @@ public class HangmanModule : InteractionModuleBase<SocketInteractionContext>
     }
 
     [SlashCommand("hangman", "Start a hangman game!")]
-    public async Task StartHangman()
+    public async Task StartHangman(EWordsFormat format = EWordsFormat.WithoutSpace)
     {
         var channelId = ulong.Parse(_configuration["HangmanChannelId"]!);
 
@@ -27,7 +27,7 @@ public class HangmanModule : InteractionModuleBase<SocketInteractionContext>
         }
 
         await Context.Interaction.RespondAsync("Starting a new hangman game - Stay Put!");
-        await _hangmanGameManager.StartNewGame(Context);
+        await _hangmanGameManager.StartNewGame(Context, format);
     }
 
     [SlashCommand("force-stop-my-game", "Force stop your hangman game.")]

@@ -23,11 +23,11 @@ public class HorseRaceManager : IHorseRaceManager
     public async Task LoadConfiguration()
     {
         _horsesAndTracks = await _horseRaceService.GetHorsesAndTracksAsync();
-
-        foreach (var track in _horsesAndTracks.Tracks)
-        {
-            StartRaceOnTrack(track);
-        }
+        //DISABLED FOR NOW
+        //foreach (var track in _horsesAndTracks.Tracks)
+        //{
+        //    StartRaceOnTrack(track);
+        //}
     }
 
     private void StartRaceOnTrack(Track track)
